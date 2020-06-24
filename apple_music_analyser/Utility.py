@@ -110,67 +110,7 @@ class Utility():
         df[col_name_prefix+' DOW'] = datetime_series['dow']
         df[col_name_prefix+' HOD'] = datetime_series['hod']
 
-    @staticmethod
-    def set_partial_listening(df):
-        if df['End Reason Type'] == 'NATURAL_END_OF_TRACK':
-            return True
-        else:
-        #if the play duration is above the media duration, we consider the track to be listened to completely
-            if df['Play Duration Milliseconds'] >= df['Media Duration In Milliseconds']:
-                return True
-            else:
-                return False
-
-    @staticmethod
-    def get_track_origin(x):
-        if str(x) != 'nan':
-            x_cat = str(x).split('/')[0].strip()
-            if x_cat == 'search' or x_cat =='browse':
-                return 'search'
-            elif x_cat == 'library' or x_cat == 'my-music' or x_cat == 'playlists' or x_cat == 'playlist_detail':
-                return 'library'
-            elif x_cat == 'for_you':
-                if len(str(x).split('/')) > 1:
-                    x_subcat = str(x).split('/')[1].strip()
-                    if x_subcat == 'recently_played':
-                        return 'for you - recently played'
-                    elif x_subcat == 'personalized_mix':
-                        return 'for you - personalized mix'
-                    else:
-                        return 'for you - other'
-                else:
-                    return 'for you - other'
-            else:
-                return 'other'
-        else:
-            return 'other'
-
-    @staticmethod
-    def compute_play_duration(df):
-        end = pd.to_datetime(df['Event End Timestamp'])
-        start = pd.to_datetime(df['Event Start Timestamp'])
-        if str(end) != 'NaT' and str(start) != 'NaT':
-            if end.day == start.day:
-                diff = end - start
-                duration = diff.total_seconds()/60
-            else:
-                duration = df['Media Duration In Milliseconds']/60000
-        else:
-            if df['Played completely'] is False:
-                if type(df['Play Duration Milliseconds']) == float:
-                    duration = df['Media Duration In Milliseconds']/60000
-                else:
-                    duration = df['Play Duration Milliseconds']/60000       
-            else:
-                duration = df['Media Duration In Milliseconds']/60000
-        return duration
-
-    @staticmethod
-    def remove_play_duration_outliers(df, percentile):
-        if df['Play duration in minutes'] <= percentile:
-            return df['Play duration in minutes']
-        else:
-            return df['Media Duration In Milliseconds']/60000
+    
 
 
 
