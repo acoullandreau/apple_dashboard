@@ -84,20 +84,24 @@ class Parser():
         self.play_activity_df['Play HOD Local Time'] = self.play_activity_df['Play HOD Local Time'].astype(int)
 
         # Add partial listening column 
-        self.set_partial_listening(self.play_activity_df['End Reason Type'], self.play_activity_df['Play Duration Milliseconds'], self.play_activity_df['Media Duration In Milliseconds'])
+        play_duration = self.play_activity_df['Play Duration Milliseconds']
+        media_duration = self.play_activity_df['Media Duration In Milliseconds']
+        self.set_partial_listening(self.play_activity_df['End Reason Type'], play_duration, media_duration)
 
         # Add track origin column
         self.play_activity_df['Track origin'] = self.play_activity_df['Feature Name'].apply(self.get_track_origin)
 
-        start = time.time()
         # Add play duration column
-        self.play_activity_df['Play duration in minutes'] = self.play_activity_df.apply(self.compute_play_duration, axis=1)
+        activity_start = pd.to_datetime(self.play_activity_df['Event Start Timestamp'])
+        activity_end = pd.to_datetime(self.play_activity_df['Event End Timestamp'])
+        played_completely = self.play_activity_df['Played completely']
+        self.compute_play_duration(activity_start, activity_end, played_completely, play_duration, media_duration)
+
         # we remove outliers from this column, saying that if a value if above the 99th percentile,
         # we drop it, and replace it by the duration of the media
         percentile = self.play_activity_df['Play duration in minutes'].quantile(0.99)
-        self.play_activity_df['Play duration in minutes'] = self.play_activity_df.apply(self.remove_play_duration_outliers, percentile=percentile, axis=1)
-        end = time.time()
-        print(end - start)
+        self.remove_play_duration_outliers(self.play_activity_df['Play duration in minutes'], media_duration, percentile)
+
         #we can then remove the columns we do not need anymore!
         if drop_columns:
             self.play_activity_df = self.play_activity_df.drop(columns_to_drop, axis=1)
@@ -123,8 +127,6 @@ class Parser():
     def parse_likes_dislikes_df(self):
         self.likes_dislikes_df['Title'] = self.likes_dislikes_df['Item Description'].str.split(' -').str.get(1).str.strip()
         self.likes_dislikes_df['Artist'] = self.likes_dislikes_df['Item Description'].str.split(' - ').str.get(0).str.strip()
-
-
 
     def set_partial_listening(self, end_reason_type, play_duration, media_duration):
         self.play_activity_df['Played completely'] = False
@@ -156,32 +158,21 @@ class Parser():
         else:
             return 'other'
 
-    @staticmethod
-    def compute_play_duration(df):
-        end = pd.to_datetime(df['Event End Timestamp'])
-        start = pd.to_datetime(df['Event Start Timestamp'])
-        if str(end) != 'NaT' and str(start) != 'NaT':
-            if end.day == start.day:
-                diff = end - start
-                duration = diff.total_seconds()/60
-            else:
-                duration = df['Media Duration In Milliseconds']/60000
-        else:
-            if df['Played completely'] is False:
-                if type(df['Play Duration Milliseconds']) == float:
-                    duration = df['Media Duration In Milliseconds']/60000
-                else:
-                    duration = df['Play Duration Milliseconds']/60000       
-            else:
-                duration = df['Media Duration In Milliseconds']/60000
-        return duration
+    def compute_play_duration(self, start, end, played_completely, play_duration, media_duration):
+        self.play_activity_df['Play duration in minutes'] = media_duration/60000
+        self.play_activity_df.loc[start.dt.day == end.dt.day, 'Play duration in minutes'] = (end - start).dt.total_seconds()/60
+        self.play_activity_df.loc[(played_completely == False)&(type(play_duration)!=float)&(play_duration>0), 'Play duration in minutes'] = play_duration/60000
 
-    @staticmethod
-    def remove_play_duration_outliers(df, percentile):
-        if df['Play duration in minutes'] <= percentile:
-            return df['Play duration in minutes']
-        else:
-            return df['Media Duration In Milliseconds']/60000
+
+    def remove_play_duration_outliers(self, play_duration, media_duration, percentile):
+        self.play_activity_df.loc[play_duration > percentile, 'Play duration in minutes'] = media_duration/60000
+
+
+
+        # if df['Play duration in minutes'] <= percentile:
+        #     return df['Play duration in minutes']
+        # else:
+        #     return df['Media Duration In Milliseconds']/60000
 
 
 
