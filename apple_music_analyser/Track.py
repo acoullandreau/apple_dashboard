@@ -49,3 +49,50 @@ class Track():
         elif rating == 'DISLIKE':
             if rating not in self.rating:
                 self.rating.append(rating)
+
+
+    def instantiate_track(self, title, artist):
+        '''
+            Creates an instance of the Track class, setting both the title and artist
+            names used when creating it (multiple titles may be found latter on and added 
+            to the list of titles for this track
+        '''
+        self.add_title(title)
+        self.set_artist(artist)
+
+
+    def update_track_from_library(self, index, row):
+        '''
+            For a given track instance, updates the properties of the track using the library
+            tracks dataframe:
+                - its appearance in the library_tracks_info_df, and at which index
+                - the genre and rating of the song when available
+                - the flag is_in_lib
+                - any of the available identifiers used to identify the track
+        '''
+        self.set_library_flag()
+        self.add_appearance({'source': 'library_tracks', 'df_index':index})
+        self.set_genre(row['Genre'])
+        self.set_rating(row['Track Like Rating'])
+        if str(row['Apple Music Track Identifier'])!='nan':
+            self.set_apple_music_id(str(int(row['Apple Music Track Identifier'])))
+            if str(row['Tag Matched Track Identifier']) !='nan' and row['Tag Matched Track Identifier'] != row['Apple Music Track Identifier']:
+                self.set_apple_music_id(str(int(row['Tag Matched Track Identifier'])))
+        else:
+            self.set_apple_music_id(str(int(row['Track Identifier'])))
+            if str(row['Purchased Track Identifier']) !='nan':
+                self.set_apple_music_id(str(int(row['Purchased Track Identifier'])))
+
+    def update_track_from_play_activity(self, index, row):
+        '''
+            For a given track instance, updates the properties of the track using the play
+            activity dataframe:
+                - its appearance in the play_activity_df, and at which index
+                - the genre of the song when available
+                - the flag is_in_lib whenever the song was found from the library
+        '''
+        self.add_appearance({'source': 'play_activity', 'df_index':index})
+        self.set_genre(row['Genre'])
+        if row['Track origin'] == 'library' and self.is_in_lib is False:
+                self.set_library_flag()
+

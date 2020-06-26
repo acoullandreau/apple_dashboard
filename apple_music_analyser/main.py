@@ -12,9 +12,6 @@ input_df = Utility.get_df_from_archive('Apple_Media_Services.zip')
 # create an instance of the visualization dataframe class
 df_viz = VisualizationDataframe(input_df)
 
-
-
-
 end = time.time()
 print('Total', end - start0)
 

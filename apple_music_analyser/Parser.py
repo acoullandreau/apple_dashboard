@@ -169,15 +169,4 @@ class Parser():
 
 
 
-        # if df['Play duration in minutes'] <= percentile:
-        #     return df['Play duration in minutes']
-        # else:
-        #     return df['Media Duration In Milliseconds']/60000
-
-
-
-
-
-
-
 

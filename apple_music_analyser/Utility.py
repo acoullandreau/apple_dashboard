@@ -1,6 +1,6 @@
-from zipfile import ZipFile
+from difflib import SequenceMatcher
 import pandas as pd
-
+from zipfile import ZipFile
 
 class Utility():
 
@@ -111,8 +111,17 @@ class Utility():
         df[col_name_prefix+' HOD'] = datetime_series['hod']
 
     
+    @staticmethod
+    def compute_similarity_score(a, b):
+        return SequenceMatcher(None, a, b).ratio()
 
-
+    @staticmethod
+    def concat_title_artist(title, artist):
+        '''
+            Returns a concatenated string without trailing spaces of the title and
+            artist names passed as args
+        '''
+        return title.strip()+' && '+artist.strip()
 
 
 
