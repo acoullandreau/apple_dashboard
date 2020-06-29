@@ -123,10 +123,26 @@ class Utility():
         '''
         return title.strip()+' && '+artist.strip()
 
+    @staticmethod
+    def clean_col_with_list(x):
+        '''
+            This function is used to break down the values of a serie containing lists.
+            The idea is to return the values as a string ('', the unique value of a list, or a join of
+            values separated by '&&').
+        '''
+        if type(x) != float:
+            if x == None or len(x) == 0:
+                return 'Unknown'
+            elif len(x) == 1:
+                return x[0]
+            else:
+                return ' && '.join(x)
+        else:
+            return 'Unknown'
 
-
-
-
+    @staticmethod
+    def compute_ratio_songs(serie):
+        return (serie.value_counts()/serie.count())*100
 
 
 

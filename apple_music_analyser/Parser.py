@@ -66,7 +66,7 @@ class Parser():
     def parse_play_activity_df(self, drop_columns=True):
         columns_to_drop = [
         'Apple Id Number', 'Apple Music Subscription', 'Build Version', 'Client IP Address',
-        'Content Specific Type', 'Device Identifier', 'Event Reason Hint Type',
+        'Content Specific Type', 'Device Identifier', 'Event Reason Hint Type', 'Activity date time',
         'End Position In Milliseconds', 'Event Received Timestamp', 'Media Type', 'Metrics Bucket Id', 
         'Metrics Client Id','Original Title', 'Source Type', 'Start Position In Milliseconds',
         'Store Country Name', 'Milliseconds Since Play', 'Event End Timestamp', 'Event Start Timestamp',

@@ -18,6 +18,21 @@ class ProcessTracks():
                              'play_activity':[], 'likes_dislikes':[]}
 
 
+    def get_track_instance_dict(self):
+        return track_instance_dict
+
+    def get_artist_tracks_titles(self):
+        return artist_tracks_titles
+
+    def get_genres_list(self):
+        return genres_list
+
+    def get_items_not_matched(self):
+        return items_not_matched
+  
+    def get_increment(self):
+        return increment
+
     def update_track_instance(self, origin_df, track_instance, index, row, title_artist):
         if origin_df == 'play_activity_df':
             track_instance.update_track_from_play_activity(index, row)
@@ -300,6 +315,99 @@ class ProcessTracks():
                         #and our reference really is the play activity!
                         self.items_not_matched['likes_dislikes'].append(index)
                         continue
+
+
+
+
+
+class TrackSummaryObject():
+
+    def __init__(self, track_instance_dict, artist_tracks_titles, genres_list, items_not_matched):
+        self.track_instance_dict = track_instance_dict
+        self.artist_tracks_titles = artist_tracks_titles
+        self.genres_list = TrackSummaryObject.simplify_genre_list(genres_list)
+        self.items_not_matched = items_not_matched
+        self.match_index_instance = {}
+        self.genres_count_dict = {}
+
+
+    def get_track_instance_dict(self):
+        return track_instance_dict
+
+    def get_artist_tracks_titles(self):
+        return artist_tracks_titles
+
+    def get_genres_list(self):
+        return genres_list
+
+    def get_items_not_matched(self):
+        return items_not_matched
+  
+    def get_match_index_instance(self):
+        return match_index_instance
+
+    def get_genres_count_dict(self):
+        return genres_count_dict
+
+    def build_index_track_instance_dict(self, target_df_label):
+        '''
+            Returns a dictionary matching the index of the target dataframe with a reference to its
+            associated Track instance.
+            
+            Argument can be of four types, for the four df we used to build the Track instances:
+                - play_activity
+                - library_tracks
+                - likes_dislikes
+                - identifier_infos
+        '''
+        for title_artist in self.track_instance_dict.keys():
+            instance = self.track_instance_dict[title_artist]
+            for appearance in instance.appearances:
+                if target_df_label in appearance['source']:
+                    if appearance['df_index'] not in self.match_index_instance:
+                        self.match_index_instance[appearance['df_index']] = []
+                    if instance not in self.match_index_instance[appearance['df_index']]:
+                        self.match_index_instance[appearance['df_index']].append(instance)
+                        self.match_index_instance[appearance['df_index']].append(instance.is_in_lib)
+                        self.match_index_instance[appearance['df_index']].append(instance.rating)
+                        self.match_index_instance[appearance['df_index']].append(instance.genre)
+
+    @staticmethod
+    def simplify_genre_list(genres_list):
+        genres_list_clean = [x if str(x) != 'nan' else '' for x in genres_list]
+        genres_list_clean = [x.strip() for x in genres_list_clean]
+        return genres_list_clean
+
+    def build_genres_count_dict(self, genres_serie):
+        genres_count_dict = {}
+        for ref_genre in self.genres_list:
+            genres_count_dict[ref_genre] = 0
+        for genre_in_serie in genres_series.tolist():
+            if '&&' in genre_in_serie:
+                genres = genre_in_serie.split('&&')
+                for genre in genres:
+                    if genre.strip() in genres_count_dict.keys():
+                        genres_count_dict[genre.strip()] += 1
+            else:
+                if genre_in_serie in genres_count_dict.keys():
+                    genres_count_dict[df_genre] += 1
+        self.genres_count_dict = genres_count_dict
+
+    @staticmethod
+    def build_count_dict(target_serie):
+        ref_list = target_serie.unique()
+        
+        count_dict = {}
+        for ref_elem in ref_list:
+            if str(ref_elem) != 'nan':
+                count_dict[ref_elem] = 0
+        for df_elem in target_serie.tolist():
+            if str(df_elem) != 'nan':
+                if df_elem in count_dict.keys():
+                    count_dict[df_elem] += 1
+            else:
+                continue      
+        return count_dict
 
 
 
