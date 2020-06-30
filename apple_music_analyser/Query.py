@@ -138,15 +138,15 @@ class Query():
             if query_category != 'year' and target_values != []:
                 query = query + '&'
                 if query_category == 'genre':
-                    query = query + Query.build_query_element('Genres', target_values)
+                    query = query + Query.build_string_query_element('Genres', target_values)
                 elif query_category == 'artist':
-                    query = query + Query.build_query_element('Artist', target_values)
+                    query = query + Query.build_string_query_element('Artist', target_values)
                 elif query_category == 'title':
-                    query = query + Query.build_query_element('Title', target_values)
+                    query = query + Query.build_string_query_element('Title', target_values)
                 elif query_category == 'rating':
-                    query = query + Query.build_query_element('Rating', target_values)
+                    query = query + Query.build_string_query_element('Rating', target_values)
                 elif query_category == 'origin':
-                    query = query + Query.build_query_element('Track_origin', target_values)
+                    query = query + Query.build_string_query_element('Track_origin', target_values)
                 elif query_category == 'offline':
                     # as here we compare with booleans, we do not use build_query_element
                     query = query + Query.build_boolean_query_element('Offline', target_values)

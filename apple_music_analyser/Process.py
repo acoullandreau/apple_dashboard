@@ -43,7 +43,6 @@ class ProcessTracks():
             #we update the dictionary that keeps track of our instances, and increment
             if row['Genre'] not in self.genres_list:
                 self.genres_list.append(row['Genre'])
-            self.track_instance_dict[title_artist] = track_instance
         else:
             print('There is no method to update a track instance from another dataframe than play_activity_df or library_tracks_df')
 
@@ -105,6 +104,7 @@ class ProcessTracks():
                             track_instance = Track(self.increment)
                             track_instance.instantiate_track(title, artist)
                             self.update_track_instance('library_tracks_df', track_instance, index, row, title_artist)
+                            self.track_instance_dict[title_artist] = track_instance
                             self.increment += 1
 
                         else:
@@ -112,17 +112,20 @@ class ProcessTracks():
                             if not track_instance.has_title_name(title):
                                 track_instance.add_title(title)
                             self.update_track_instance('library_tracks_df', track_instance, index, row, title_artist)
-                            #self.artist_tracks_titles[artist].append(title)
+                            self.track_instance_dict[title_artist] = track_instance
+                            self.artist_tracks_titles[artist].append(title)
                     
                     else:
                         #there was no close match, and the song was never seen, so we instantiate a new Track
                         track_instance = Track(self.increment)
                         track_instance.instantiate_track(title, artist)
                         self.update_track_instance('library_tracks_df', track_instance, index, row, title_artist)
+                        self.track_instance_dict[title_artist] = track_instance
                         self.increment += 1
 
 
                 else:
+                    track_instance = self.track_instance_dict[title_artist]
                     self.update_track_instance('library_tracks_df', track_instance, index, row, title_artist)
 
 
@@ -300,7 +303,7 @@ class ProcessTracks():
                         if titles_comparison_result == 'No match':
                             #we add the item to the items_not_matched
                             self.items_not_matched['likes_dislikes'].append(index)
-                            continue
+                            #continue
                         else:
                             track_instance = titles_comparison_result
                             if not track_instance.has_title_name(title):
@@ -377,6 +380,7 @@ class TrackSummaryObject():
         genres_list_clean = [x if str(x) != 'nan' else '' for x in genres_list]
         genres_list_clean = [x.strip() for x in genres_list_clean]
         return genres_list_clean
+
 
     def build_genres_count_dict(self, genres_serie):
         genres_count_dict = {}

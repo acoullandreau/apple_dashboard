@@ -94,5 +94,5 @@ class Track():
         self.add_appearance({'source': 'play_activity', 'df_index':index})
         self.set_genre(row['Genre'])
         if row['Track origin'] == 'library' and self.is_in_lib is False:
-                self.set_library_flag()
+            self.set_library_flag()
 

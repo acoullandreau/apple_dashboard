@@ -20,7 +20,7 @@ class VisualizationDataframe():
         self.process_tracks = ProcessTracks()
         self.process_tracks_in_df()
         self.track_summary_objects = TrackSummaryObject(self.process_tracks.track_instance_dict, self.process_tracks.artist_tracks_titles, self.process_tracks.genres_list, self.process_tracks.items_not_matched)
-        self.df_visualization = self.build_df_visualisation()
+        self.df_visualization = self.build_df_visualisation('play_activity')
 
     def get_df_viz(self):
         return self.df_visualization
@@ -53,16 +53,28 @@ class VisualizationDataframe():
 
     def process_tracks_in_df(self):
         # we process the library tracks
+        start = time.time()
         self.process_tracks.process_library_tracks_df(self.library_tracks_df)
+        end = time.time()
+        print('lib', end - start)
         # we process the identifier infos
+        start = time.time()
         self.process_tracks.process_identifier_df(self.identifier_infos_df)
+        end = time.time()
+        print('identifier', end - start)
         # we process the play activity
+        start = time.time()
         self.process_tracks.process_play_df(self.play_activity_df)
+        end = time.time()
+        print('play', end - start)
         # we process the likes dislikes
+        start = time.time()
         self.process_tracks.process_likes_dislikes_df(self.likes_dislikes_df)
+        end = time.time()
+        print('likes', end - start)
 
-    def build_df_visualisation(self):
-        self.track_summary_objects.build_index_track_instance_dict('play_activity')
+    def build_df_visualisation(self, target_df):
+        self.track_summary_objects.build_index_track_instance_dict(target_df)
         match_index_instance_activity = self.track_summary_objects.match_index_instance
         index_instance_df = pd.DataFrame.from_dict(match_index_instance_activity, orient='index', columns=['Track Instance', 'Library Track', 'Rating', 'Genres'])
         df_visualization = self.play_activity_df.drop(['Genre'], axis=1)
@@ -71,7 +83,6 @@ class VisualizationDataframe():
         df_visualization['Genres'] = df_visualization['Genres'].apply(Utility.clean_col_with_list)
         df_visualization['Library Track'].fillna(False, inplace=True)
         df_visualization.columns = [c.replace(' ', '_') for c in df_visualization.columns]
-
         return df_visualization
 
 
