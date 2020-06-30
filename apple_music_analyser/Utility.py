@@ -1,5 +1,6 @@
 from difflib import SequenceMatcher
 import pandas as pd
+import pickle
 from zipfile import ZipFile
 
 class Utility():
@@ -144,6 +145,15 @@ class Utility():
     def compute_ratio_songs(serie):
         return (serie.value_counts()/serie.count())*100
 
+    @staticmethod
+    def save_to_pickle(object_to_save, file_path):
+        with open(file_path, 'wb') as output:
+          pickle.dump(object_to_save, output, pickle.HIGHEST_PROTOCOL)
+
+    @staticmethod
+    def load_from_pickle(path_of_file):
+        with open(path_of_file, 'rb') as input:
+            return pickle.load(input)
 
 
 

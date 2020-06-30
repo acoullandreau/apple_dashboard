@@ -1,5 +1,5 @@
 import pandas as pd
-import time
+import pickle
 
 from Utility import Utility
 from Parser import Parser
@@ -53,25 +53,13 @@ class VisualizationDataframe():
 
     def process_tracks_in_df(self):
         # we process the library tracks
-        start = time.time()
         self.process_tracks.process_library_tracks_df(self.library_tracks_df)
-        end = time.time()
-        print('lib', end - start)
         # we process the identifier infos
-        start = time.time()
         self.process_tracks.process_identifier_df(self.identifier_infos_df)
-        end = time.time()
-        print('identifier', end - start)
         # we process the play activity
-        start = time.time()
         self.process_tracks.process_play_df(self.play_activity_df)
-        end = time.time()
-        print('play', end - start)
         # we process the likes dislikes
-        start = time.time()
         self.process_tracks.process_likes_dislikes_df(self.likes_dislikes_df)
-        end = time.time()
-        print('likes', end - start)
 
     def build_df_visualisation(self, target_df):
         self.track_summary_objects.build_index_track_instance_dict(target_df)
