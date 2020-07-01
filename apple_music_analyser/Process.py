@@ -1,3 +1,4 @@
+from Query import Query, QueryFactory
 from Track import Track
 from Utility import Utility
 
@@ -331,8 +332,6 @@ class TrackSummaryObject():
         self.genres_list = TrackSummaryObject.simplify_genre_list(genres_list)
         self.items_not_matched = items_not_matched
         self.match_index_instance = {}
-        self.genres_count_dict = {}
-
 
     def get_track_instance_dict(self):
         return track_instance_dict
@@ -348,9 +347,6 @@ class TrackSummaryObject():
   
     def get_match_index_instance(self):
         return match_index_instance
-
-    def get_genres_count_dict(self):
-        return genres_count_dict
 
     def build_index_track_instance_dict(self, target_df_label):
         '''
@@ -386,7 +382,7 @@ class TrackSummaryObject():
         genres_count_dict = {}
         for ref_genre in self.genres_list:
             genres_count_dict[ref_genre] = 0
-        for genre_in_serie in genres_series.tolist():
+        for genre_in_serie in genres_serie.tolist():
             if '&&' in genre_in_serie:
                 genres = genre_in_serie.split('&&')
                 for genre in genres:
@@ -394,11 +390,10 @@ class TrackSummaryObject():
                         genres_count_dict[genre.strip()] += 1
             else:
                 if genre_in_serie in genres_count_dict.keys():
-                    genres_count_dict[df_genre] += 1
-        self.genres_count_dict = genres_count_dict
+                    genres_count_dict[genre_in_serie] += 1
+        return genres_count_dict
 
-    @staticmethod
-    def build_count_dict(target_serie):
+    def build_count_dict(self, target_serie):
         ref_list = target_serie.unique()
         
         count_dict = {}
@@ -412,6 +407,20 @@ class TrackSummaryObject():
             else:
                 continue      
         return count_dict
+
+    def build_ranking_dict_per_year(self, df, ranking_target, query_params):
+        ranking_dict = {}
+        for year in query_params['year']:
+            instance_params = query_params
+            instance_params['year'] = [year]
+            query_instance = QueryFactory().create_query(df, instance_params)
+            filtered_df = query_instance.get_filtered_df()
+            if ranking_target == 'Genres':
+                ranking_dict[year] = self.build_genres_count_dict(filtered_df[ranking_target])
+            elif ranking_target in ['Artist', 'Track_origin', 'Title']:
+                ranking_dict[year] = self.build_count_dict(filtered_df[ranking_target])   
+        
+        return ranking_dict
 
 
 

@@ -1,21 +1,35 @@
 
 
+class QueryFactory():
+
+    def create_query(self, reference_df, params_dict=None):
+        if params_dict == None:
+            query_params_default = {
+                'year':reference_df['Play_Year'].unique(),
+                'genre':[],
+                'artist':[],
+                'title':[],
+                'rating':[],
+                'origin':[],
+                'offline':[],
+                'library':[],
+                'skipped':[],
+            }
+            return Query(reference_df, query_params_default)
+
+        else:
+            return Query(reference_df, params_dict)
+
+
+
+
 class Query():
 
-    def __init__(self, reference_df):
-        self.query_params_default = {
-            'year':reference_df['Play_Year'].unique(),
-            'genre':[],
-            'artist':[],
-            'title':[],
-            'rating':[],
-            'origin':[],
-            'offline':[],
-            'library':[],
-            'skipped':[],
-        }
-        self.query_params = self.query_params_default
-        self.query_string = ''
+    def __init__(self, reference_df, query_params):
+        self.reference_df = reference_df
+        self.query_params = query_params
+        self.query_string = self.manage_query_filters()
+        self.filtered_df = self.filter_df()
 
     def get_query_params(self):
         return self.query_params
@@ -23,24 +37,22 @@ class Query():
     def get_query_string(self):
         return self.query_string
 
+    def get_filtered_df(self):
+        return self.filtered_df
 
-    def manage_query_filters(self, filter_on_single_year=''):
+    def filter_df(self):
+        filtered_df = self.reference_df.query(self.query_string)
+        return filtered_df
+
+    def manage_query_filters(self):
         '''
             This function returns a query that can be used to filter the dataframe.
             It takes as an input a dictionary, query_params, that will contain the set of
             filters we want to apply on the dataframe. 
-            Besides, the flag filter_on_single_year is used to know if the result should be
-            provided for a single year (usesul when plotting subplots), or aggregating the
-            results for all the years listed in query_params.
         '''
-        if filter_on_single_year != '':
-            query = Query.build_numeric_query_element('Play_Year', filter_on_single_year)
-        else:
-            query = Query.build_numeric_query_element('Play_Year', self.query_params['year'])
-
+        query = Query.build_numeric_query_element('Play_Year', self.query_params['year'])
         query = query + self.build_data_query()
-        
-        self.query_string = query
+        return query
 
 
     @staticmethod
