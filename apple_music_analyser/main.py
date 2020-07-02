@@ -1,6 +1,6 @@
 from VisualizationDataframe import VisualizationDataframe
 from Utility import Utility
-from DataVisualization import SunburstVisualization, RankingListVisualization, HeatMapVisualization
+from DataVisualization import SunburstVisualization, RankingListVisualization, HeatMapVisualization, PieChartVisualization
 from Query import Query, QueryFactory
 
 import time
@@ -12,7 +12,7 @@ start0 = time.time()
 
 # create an instance of the visualization dataframe class
 #df_viz = VisualizationDataframe(input_df)
-#Utility.save_to_pickle(df_viz, 'df_viz')
+#Utility.save_to_pickle(df_viz, 'df_viz.pkl')
 
 df_viz = Utility.load_from_pickle('df_viz.pkl')
 
@@ -43,6 +43,7 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 # ranking = RankingListVisualization(ranking_dict, 5)
 # print(ranking.ranked_dict)
 
+
 #plot a heatmap for a single year
 # query_params = {
 #     'year':[2018],
@@ -50,8 +51,8 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 # }
 # filtered_df = QueryFactory().create_query(df_viz.get_df_viz(), query_params)
 # heat_map = HeatMapVisualization(filtered_df.filtered_df)
-# data = heat_map.render_day_heat_map('2018')
-# heat_map.render_single_heat_map(data)
+# heat_map.build_day_heat_map('2018')
+# heat_map.render_heat_map()
 # heat_map.figure.show()
 
 #plot a heatmap for multiple years
@@ -74,6 +75,22 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 
 
 
+# plot a pie chart
+# query_params = {
+#     'year':[2017, 2018, 2019],
+#     'rating':['LOVE']
+# }
+# filtered_df = QueryFactory().create_query(df_viz.get_df_viz(), query_params)
+# pie_chart = PieChartVisualization(filtered_df.filtered_df['Play_Year'])
+# pie_chart.build_pie()
+# pie_chart.render_pie_chart()
+# pie_chart.figure.show()
+
+# plot a pie chart with another df
+# pie_chart = PieChartVisualization(df_viz.get_library_activity_df()['Transaction Agent Model'])
+# pie_chart.build_pie()
+# pie_chart.render_pie_chart()
+# pie_chart.figure.show()
 
 
 
@@ -81,8 +98,8 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 
 
 
-
-
+# print(df_viz.get_library_activity_df()['Transaction Agent Model'].isnull().sum())
+# print(df_viz_2.get_library_activity_df()['Transaction Agent Model'].isnull().sum())
 
 #visualization = DataVisualization(df_viz.get_df_viz(), query_params)
 #print(df_viz.get_df_viz().shape)

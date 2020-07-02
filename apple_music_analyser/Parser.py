@@ -58,7 +58,7 @@ class Parser():
     
         # parse action agent column
         self.library_activity_df['Transaction Agent'] = self.library_activity_df['UserAgent'].str.split('/').str.get(0)
-        self.library_activity_df['Transaction Agent'] = self.library_activity_df.replace({'Transaction Agent' : { 'itunescloudd' : 'iPhone', 'iTunes' : 'Macintosh'}})
+        self.library_activity_df.replace({'Transaction Agent' : { 'itunescloudd' : 'iPhone', 'iTunes' : 'Macintosh'}}, inplace=True)
         self.library_activity_df['Transaction Agent Model'] = self.library_activity_df[self.library_activity_df['Transaction Agent'] == 'iPhone']['UserAgent'].str.split('/').str.get(3).str.split(',').str.get(0)
         self.library_activity_df.loc[self.library_activity_df['Transaction Agent'].eq('Macintosh'), 'Transaction Agent Model'] = 'Macintosh'
 

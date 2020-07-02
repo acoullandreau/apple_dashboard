@@ -75,19 +75,14 @@ class RankingListVisualization():
 
 class HeatMapVisualization():
 
-    def __init__(self, df_viz, with_subplots=0):
+    def __init__(self, df_viz, with_subplots=1):
         self.df = df_viz
         self.with_subplots = with_subplots
-        self.figure = self.create_figure_object()
+        self.title = 'Heat map of the play duration in minutes for each day'
+        self.figure = make_subplots(rows=self.with_subplots, cols=1)
         self.height = 0
         self.row = 1
         self.data = None
-
-    def create_figure_object(self):
-        if self.with_subplots == 0:
-            return go.Figure()
-        else:
-            return make_subplots(rows=self.with_subplots, cols=1)
 
     def build_day_heat_map(self, title):
         '''
@@ -123,7 +118,7 @@ class HeatMapVisualization():
                      row=self.row, col=1)
 
         self.figure.update_layout(
-            title='Heat map of the play duration in minutes for each day',
+            title=self.title,
             height = self.height,
             coloraxis=dict(colorscale='hot'),
             showlegend=False
@@ -141,6 +136,29 @@ class BarChartVisualization():
 
 class PieChartVisualization():
 
-    def __init__(self, df_viz, subplots):
-        return None 
+    def __init__(self, serie_to_plot, with_subplots=1):
+        self.serie_to_plot = serie_to_plot
+        self.with_subplots = with_subplots
+        self.title = 'Pie chart'
+        self.figure = go.Figure()
+        self.height = 500
+        self.data = None
+
+    def build_pie(self):
+        labels = self.serie_to_plot.dropna().unique()
+        values = self.serie_to_plot.value_counts()
+        pie = go.Pie(labels=labels, values=values, textinfo='label+percent')
+        self.data = pie
+
+    def render_pie_chart(self):
+        self.figure.add_trace(self.data)
+        self.update_figure_info()
+
+    def update_figure_info(self):
+        self.figure.update_layout(
+            title=self.title,
+            height = self.height,
+            showlegend=False,
+        )
+
 
