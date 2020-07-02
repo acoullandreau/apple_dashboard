@@ -1,5 +1,5 @@
 venv
-data*
+data/Apple_Media_Services*
 node_modules*
 *pycache*
 *.egg*
