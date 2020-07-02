@@ -1,0 +1,6 @@
+venv
+data*
+node_modules*
+*pycache*
+*.egg*
+*site-packages*
