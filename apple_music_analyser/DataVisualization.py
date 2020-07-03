@@ -1,6 +1,7 @@
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
+from Utility import Utility
 
 class SunburstVisualization():
 
@@ -106,7 +107,8 @@ class HeatMapVisualization():
         self.data = hist
         
 
-    def render_heat_map(self):
+    def render_heat_map(self, title):
+        self.build_day_heat_map(title)
         self.figure.add_trace(self.data, row = self.row, col=1)
         self.height += 500
         self.update_figure_info()
@@ -128,17 +130,66 @@ class HeatMapVisualization():
 
 class BarChartVisualization():
 
-    def __init__(self, df_viz, subplots):
-        return None
+    def __init__(self, df_viz, with_subplots=0):
+        self.df = df_viz
+        self.with_subplots = with_subplots
+        self.title = 'Distribution of tracks'
+        self.figure = self.create_figure()
+        self.hover_unit = ''
+        self.height = 500
+        self.row = 1
+        self.data = None
+
+    def create_figure(self):
+        if self.with_subplots == 0:
+            return go.Figure()
+        else:
+            return make_subplots(rows=self.with_subplots, cols=1)
+
+
+    def build_bar_chart(self, x_serie, y_serie, name):
+        '''
+            This function is in charge of building a single 2D Histogram trace.
+        '''
+        bar = go.Bar(
+            name=name,
+            x=x_serie,
+            y=y_serie,
+            hovertemplate=
+            "<b>{0}</b><br>".format(name) +
+            "<b>%{x}</b><br>" +
+            "%{y:,.0f}" + "{0}<br>".format(self.hover_unit) +
+            "<extra></extra>"
+            )
+
+        self.data = bar
+
+
+    def render_bar_chart(self, x_serie, y_serie, name):
+        self.build_bar_chart(x_serie, y_serie, name)
+
+        if self.with_subplots == 0:
+            self.figure.add_trace(self.data)
+        else:
+            self.figure.add_trace(self.data, row = self.row, col=1)
+            self.height += 500
+        self.update_figure_info()
+        self.row +=1
+
+
+    def update_figure_info(self):
+        self.figure.update_layout(
+            title=self.title,
+            height = self.height,
+        )
 
 
 
 
 class PieChartVisualization():
 
-    def __init__(self, serie_to_plot, with_subplots=1):
+    def __init__(self, serie_to_plot):
         self.serie_to_plot = serie_to_plot
-        self.with_subplots = with_subplots
         self.title = 'Pie chart'
         self.figure = go.Figure()
         self.height = 500
@@ -151,6 +202,7 @@ class PieChartVisualization():
         self.data = pie
 
     def render_pie_chart(self):
+        self.build_pie()
         self.figure.add_trace(self.data)
         self.update_figure_info()
 

@@ -1,6 +1,6 @@
 from VisualizationDataframe import VisualizationDataframe
 from Utility import Utility
-from DataVisualization import SunburstVisualization, RankingListVisualization, HeatMapVisualization, PieChartVisualization
+from DataVisualization import SunburstVisualization, RankingListVisualization, HeatMapVisualization, PieChartVisualization, BarChartVisualization
 from Query import Query, QueryFactory
 
 import time
@@ -51,8 +51,7 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 # }
 # filtered_df = QueryFactory().create_query(df_viz.get_df_viz(), query_params)
 # heat_map = HeatMapVisualization(filtered_df.filtered_df)
-# heat_map.build_day_heat_map('2018')
-# heat_map.render_heat_map()
+# heat_map.render_heat_map('2018')
 # heat_map.figure.show()
 
 #plot a heatmap for multiple years
@@ -64,12 +63,11 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 # heat_map = HeatMapVisualization(df_viz.get_df_viz(), 3)
 
 # for year in query_params['year']:
-# 	year_query_params = query_params
-# 	year_query_params['year'] = [year]
-# 	filtered_df = QueryFactory().create_query(df_viz.get_df_viz(), query_params)
-# 	heat_map.df = filtered_df.filtered_df
-# 	heat_map.build_day_heat_map(str(year))
-# 	heat_map.render_heat_map()
+#   year_query_params = query_params
+#   year_query_params['year'] = [year]
+#   filtered_df = QueryFactory().create_query(df_viz.get_df_viz(), query_params)
+#   heat_map.df = filtered_df.filtered_df
+#   heat_map.render_heat_map(str(year))
 
 # heat_map.figure.show()
 
@@ -82,60 +80,109 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 # }
 # filtered_df = QueryFactory().create_query(df_viz.get_df_viz(), query_params)
 # pie_chart = PieChartVisualization(filtered_df.filtered_df['Play_Year'])
-# pie_chart.build_pie()
 # pie_chart.render_pie_chart()
 # pie_chart.figure.show()
 
 # plot a pie chart with another df
 # pie_chart = PieChartVisualization(df_viz.get_library_activity_df()['Transaction Agent Model'])
-# pie_chart.build_pie()
 # pie_chart.render_pie_chart()
 # pie_chart.figure.show()
 
 
 
+# plot a bar chart - DOW
+# df = df_viz.get_df_viz()
+# years_to_plot = sorted(df['Play_Year'].dropna().unique())
+# bar_chart = BarChartVisualization(df)
+# bar_chart.hover_unit = '%'
+
+# for year in years_to_plot:
+#     x_serie = df[df['Play_Year']==year]['Play_DOW'].unique()
+#     y_serie = Utility.compute_ratio_songs(df[df['Play_Year']==year]['Play_DOW'])
+#     bar_chart.render_bar_chart(x_serie, y_serie, str(year))
+
+# xaxis=dict(categoryorder='array',
+#             tickangle = -45,
+#             categoryarray = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+
+# bar_chart.figure.update_layout(xaxis =xaxis)
+# bar_chart.figure.show()
 
 
 
+# plot a bar chart - Month
+# df = df_viz.get_df_viz()
+# years_to_plot = sorted(df['Play_Year'].dropna().unique())
+# bar_chart = BarChartVisualization(df)
+# bar_chart.title = 'Distribution of number of tracks listened to per mont for different years'
 
-# print(df_viz.get_library_activity_df()['Transaction Agent Model'].isnull().sum())
-# print(df_viz_2.get_library_activity_df()['Transaction Agent Model'].isnull().sum())
+# for year in years_to_plot:
+#     x_serie = df[df['Play_Year']==year]['Play_Month'].unique()
+#     y_serie = df[df['Play_Year']==year]['Play_Month'].value_counts()
+#     bar_chart.render_bar_chart(x_serie, y_serie, str(year))
 
-#visualization = DataVisualization(df_viz.get_df_viz(), query_params)
-#print(df_viz.get_df_viz().shape)
+# xaxis=dict(
+#     tickangle = -45,
+#     tickmode = 'array',
+#     tickvals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+#     ticktext = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'])
 
-#logic : 
-#decide what to plot, with agg and subplot
-#if no agg and no subplot -> multiple query, one output df per year, add_trace
-#if no agg and subplot -> multiple query, one output df per year, make_subplots
-#if agg -> query with all years, single_trace
+# yaxis=dict(
+#     title='Percentage of tracks listened to per year',
+#     titlefont_size=16,
+#     tickfont_size=14,
+# )
 
-# visualization_params = {
-# 	aggregate:False,
-# 	subplots:False,
-# 	plot_type:'',
-# 	query_params:query_params
-# }
-#plot_type in ['sunburst', 'pie', 'bar', 'list']
+# bar_chart.figure.update_layout(xaxis = xaxis, yaxis = yaxis)
+# bar_chart.figure.show()
+
+
+
+# plot subplots of bar chart - HOD
+# df = df_viz.get_df_viz()
+# years_to_plot = sorted(df['Play_Year'].dropna().unique())
+# bar_chart = BarChartVisualization(df, with_subplots=len(years_to_plot))
+
+# for year in years_to_plot:
+#     x_serie = df[df['Play_Year']==year]['Play_HOD_Local_Time'].unique()
+#     y_serie = df[df['Play_Year']==year]['Play_HOD_Local_Time'].value_counts()
+#     bar_chart.render_bar_chart(x_serie, y_serie, str(year))
+
+# bar_chart.figure.show()
+
+
+
+# plot bar chart with two series
+# df = df_viz.get_df_viz()
+# years_to_plot = sorted(df['Play_Year'].dropna().unique())
+# bar_chart = BarChartVisualization(df)
+# bar_chart.title='Ratio of tracks skipped, versus listened to completely, per year'
+# bar_chart.hover_unit = '%'
+
+# df_track_complete = df[df['Played_completely']==True]
+# df_track_partial = df[df['Played_completely']==False]
+# y_complete = []
+# y_partial = []
+
+# for year in years_to_plot:
+#     count_tracks_complete = df_track_complete[df_track_complete['Play_Year']==year].shape[0]
+#     count_tracks_partial = df_track_partial[df_track_partial['Play_Year']==year].shape[0]
+#     percent_tracks_complete = 100*count_tracks_complete/df[df['Play_Year']==year].shape[0]
+#     percent_tracks_partial = 100*count_tracks_partial/df[df['Play_Year']==year].shape[0]
+#     y_complete.append(percent_tracks_complete)
+#     y_partial.append(percent_tracks_partial)
+
+# bar_chart.render_bar_chart(years_to_plot, y_complete, 'Complete listening')
+# bar_chart.render_bar_chart(years_to_plot, y_partial, 'Partial listening')
+
+# bar_chart.figure.update_layout(
+#     barmode='stack',
+#     yaxis=dict(title='Percentage of tracks')
+# )
+# bar_chart.figure.show()
+
+
 
 
 end = time.time()
 print('Total', end - start0)
-
-# def list_top_ranked(df, ranking_target, num_ranks, query_params=query_params_default):
-#     ranking_dict = build_ranking_dict_per_year(df, ranking_target, query_params)
-#     for year in query_params['year']:
-#         ranking = {key: ranking_dict[year][key] for key in sorted(ranking_dict[year], key=ranking_dict[year].get, reverse=True)[:num_ranks]}
-#         print('Top ranking for '+ str(year))
-#         print('   ', ranking)
-#         print('\n')
-
-
-
-#cases to cover
-#default dict, aggregated, no subplots
-#default dict, not aggregated, no subplots
-#default dict, not aggregated, subplots
-#query dict, aggregated, no subplots
-#query dict, not aggregated, no subplots
-#query dict, not aggregated, subplots
