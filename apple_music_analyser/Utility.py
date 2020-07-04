@@ -101,15 +101,20 @@ class Utility():
 
         return year, month, dom, dow, hod
 
+    @staticmethod
+    def convert_to_local_time(datetime_serie, timezone_serie):
+        timedelta = pd.to_timedelta(timezone_serie, unit='s')
+        return datetime_serie + timedelta
 
     @staticmethod
-    def add_time_related_columns(df, datetime_series, col_name_prefix):
-        df[col_name_prefix+' date time'] = datetime_series['datetime']
-        df[col_name_prefix+' Year'] = datetime_series['year']
-        df[col_name_prefix+' Month'] = datetime_series['month']
-        df[col_name_prefix+' DOM'] = datetime_series['dom']
-        df[col_name_prefix+' DOW'] = datetime_series['dow']
-        df[col_name_prefix+' HOD'] = datetime_series['hod']
+    def add_time_related_columns(df, datetime_series, col_name_prefix='', col_name_suffix=''):
+        df[col_name_prefix+'date time'+col_name_suffix] = datetime_series['datetime']
+        df[col_name_prefix+'Year'+col_name_suffix] = datetime_series['year']
+        df[col_name_prefix+'Month'+col_name_suffix] = datetime_series['month']
+        df[col_name_prefix+'DOM'+col_name_suffix] = datetime_series['dom']
+        df[col_name_prefix+'DOW'+col_name_suffix] = datetime_series['dow']
+        df[col_name_prefix+'HOD'+col_name_suffix] = datetime_series['hod']
+
 
     
     @staticmethod

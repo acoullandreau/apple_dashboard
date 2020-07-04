@@ -16,6 +16,11 @@ start0 = time.time()
 
 df_viz = Utility.load_from_pickle('df_viz.pkl')
 
+#print(df_viz.play_activity_df.columns)
+#print(df_viz.play_activity_df[['Play date time', 'Play HOD UTC','Play HOD Local Time']])
+#print(df_viz.play_activity_df[df_viz.play_activity_df['Play HOD Local Time']<0][['Play date time', 'Play HOD UTC','Play HOD Local Time']])
+
+
 #extract a df using a query
 # query_params = {
 #     'year':[2017, 2018, 2019],
@@ -26,11 +31,10 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 
 #plot a sunburst
 # query_params = {
-#     'year':[2017, 2018, 2019],
-#     'rating':['LOVE']
+#     'year':[2016, 2017, 2018, 2019],
 # }
-# ranking_dict = df_viz.track_summary_objects.build_ranking_dict_per_year(df_viz.get_df_viz(), 'Genres', query_params)
-# sunburst = SunburstVisualization(ranking_dict, 'Genres')
+# ranking_dict = df_viz.track_summary_objects.build_ranking_dict_per_year(df_viz.get_df_viz(), 'Artist', query_params)
+# sunburst = SunburstVisualization(ranking_dict, 'Artist')
 # sunburst.render_sunburst_plot()
 
 
@@ -60,7 +64,7 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 #     'rating':['LOVE']
 # }
 
-# heat_map = HeatMapVisualization(df_viz.get_df_viz(), 3)
+# heat_map = HeatMapVisualization(df_viz.get_df_viz(), 4)
 
 # for year in query_params['year']:
 #   year_query_params = query_params
@@ -93,6 +97,7 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 # plot a bar chart - DOW
 # df = df_viz.get_df_viz()
 # years_to_plot = sorted(df['Play_Year'].dropna().unique())
+# years_to_plot = [2015, 2016, 2017, 2018, 2019]
 # bar_chart = BarChartVisualization(df)
 # bar_chart.hover_unit = '%'
 
@@ -139,16 +144,17 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 
 
 # plot subplots of bar chart - HOD
-# df = df_viz.get_df_viz()
-# years_to_plot = sorted(df['Play_Year'].dropna().unique())
-# bar_chart = BarChartVisualization(df, with_subplots=len(years_to_plot))
+df = df_viz.get_df_viz()
+years_to_plot = sorted(df['Play_Year'].dropna().unique())
+years_to_plot = [2015, 2016, 2017, 2018, 2019]
+bar_chart = BarChartVisualization(df, with_subplots=len(years_to_plot))
 
-# for year in years_to_plot:
-#     x_serie = df[df['Play_Year']==year]['Play_HOD_Local_Time'].unique()
-#     y_serie = df[df['Play_Year']==year]['Play_HOD_Local_Time'].value_counts()
-#     bar_chart.render_bar_chart(x_serie, y_serie, str(year))
+for year in years_to_plot:
+    x_serie = df[df['Play_Year']==year]['Play_HOD'].unique()
+    y_serie = df[df['Play_Year']==year]['Play_HOD'].value_counts()
+    bar_chart.render_bar_chart(x_serie, y_serie, str(year))
 
-# bar_chart.figure.show()
+bar_chart.figure.show()
 
 
 

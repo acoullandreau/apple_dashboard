@@ -54,7 +54,7 @@ class Parser():
     def parse_library_activity_df(self):
         # parse time related column
         parsed_datetime_series = Utility.parse_date_time_column(self.library_activity_df, 'Transaction Date')
-        Utility.add_time_related_columns(self.library_activity_df, parsed_datetime_series, 'Transaction')
+        Utility.add_time_related_columns(self.library_activity_df, parsed_datetime_series, col_name_prefix='Transaction ')
     
         # parse action agent column
         self.library_activity_df['Transaction Agent'] = self.library_activity_df['UserAgent'].str.split('/').str.get(0)
@@ -63,7 +63,7 @@ class Parser():
         self.library_activity_df.loc[self.library_activity_df['Transaction Agent'].eq('Macintosh'), 'Transaction Agent Model'] = 'Macintosh'
 
 
-    def parse_play_activity_df(self, drop_columns=True):
+    def parse_play_activity_df(self, convert_to_local_time = True, drop_columns=True):
         columns_to_drop = [
         'Apple Id Number', 'Apple Music Subscription', 'Build Version', 'Client IP Address',
         'Content Specific Type', 'Device Identifier', 'Event Reason Hint Type', 'Activity date time',
@@ -74,14 +74,14 @@ class Parser():
         ]
         # Rename columns for merges later
         self.play_activity_df.rename(columns={'Content Name':'Title', 'Artist Name':'Artist'}, inplace=True)
+        
         # Add time related columns
         self.play_activity_df['Activity date time'] = pd.to_datetime(self.play_activity_df['Event Start Timestamp'])
         self.play_activity_df['Activity date time'].fillna(pd.to_datetime(self.play_activity_df['Event End Timestamp']), inplace=True)
+        if convert_to_local_time is True:
+            self.play_activity_df['Activity date time'] = Utility.convert_to_local_time(self.play_activity_df['Activity date time'], self.play_activity_df['UTC Offset In Seconds'])
         parsed_datetime_series = Utility.parse_date_time_column(self.play_activity_df, 'Activity date time')
-        Utility.add_time_related_columns(self.play_activity_df, parsed_datetime_series, 'Play')
-        self.play_activity_df = self.play_activity_df.rename(columns={'Play HOD':'Play HOD UTC'})
-        self.play_activity_df['Play HOD Local Time']= self.play_activity_df['Play HOD UTC'] + self.play_activity_df['UTC Offset In Seconds']/3600
-        self.play_activity_df['Play HOD Local Time'] = self.play_activity_df['Play HOD Local Time'].astype(int)
+        Utility.add_time_related_columns(self.play_activity_df, parsed_datetime_series, col_name_prefix='Play ')
 
         # Add partial listening column 
         play_duration = self.play_activity_df['Play Duration Milliseconds']
