@@ -105,8 +105,6 @@ class Parser():
         percentile = self.play_activity_df['Play duration in minutes'].quantile(0.99)
         self.remove_play_duration_outliers(self.play_activity_df['Play duration in minutes'], media_duration, percentile)
 
-
-
         #we can then remove the columns we do not need anymore!
         if drop_columns:
             self.play_activity_df = self.play_activity_df.drop(columns_to_drop, axis=1)

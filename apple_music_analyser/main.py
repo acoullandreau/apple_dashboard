@@ -16,11 +16,9 @@ start0 = time.time()
 
 df_viz = Utility.load_from_pickle('df_viz.pkl')
 
-#print(df_viz.get_df_viz()[df_viz.get_df_viz()['Play_Year'] < 2015])
-#print(df_viz.play_activity_df[['Play date time', 'Play HOD UTC','Play HOD Local Time']])
-#print(df_viz.play_activity_df[df_viz.play_activity_df['Play HOD Local Time']<0][['Play date time', 'Play HOD UTC','Play HOD Local Time']])
 
 
+###########################################################################################################################
 #extract a df using a query
 # query_params = {
 #     'year':[2017, 2018, 2019],
@@ -29,6 +27,8 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 #filtered_df = QueryFactory().create_query(df_viz.get_df_viz(), query_params)
 #print(filtered_df.filtered_df.shape)
 
+
+###########################################################################################################################
 #plot a sunburst
 # query_params = {
 #     'year':[2016, 2017, 2018, 2019],
@@ -38,6 +38,8 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 # sunburst.render_sunburst_plot()
 
 
+
+###########################################################################################################################
 #get a ranking dict
 # query_params = {
 #     'year':[2017, 2018, 2019],
@@ -48,14 +50,15 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 # print(ranking.ranked_dict)
 
 
-#plot a heatmap for a single year
+###########################################################################################################################
+#plot a heatmap DOM for a single year
 # query_params = {
 #     'year':[2018],
 #     'rating':['LOVE']
 # }
 # filtered_df = QueryFactory().create_query(df_viz.get_df_viz(), query_params)
 # heat_map = HeatMapVisualization(filtered_df.filtered_df)
-# heat_map.render_heat_map('2018')
+# heat_map.render_heat_map('DOM', '2018')
 # heat_map.figure.show()
 
 #plot a heatmap for multiple years
@@ -64,18 +67,47 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 #     'rating':['LOVE']
 # }
 
-# heat_map = HeatMapVisualization(df_viz.get_df_viz(), 4)
+# heat_map = HeatMapVisualization(df_viz.get_df_viz(), 3)
 
 # for year in query_params['year']:
 #   year_query_params = query_params
 #   year_query_params['year'] = [year]
 #   filtered_df = QueryFactory().create_query(df_viz.get_df_viz(), query_params)
 #   heat_map.df = filtered_df.filtered_df
-#   heat_map.render_heat_map(str(year))
+#   heat_map.render_heat_map('DOM', str(year))
+
+# heat_map.figure.show()
+
+#plot a heatmap DOW for a single year
+query_params = {
+    'year':[2018],
+}
+filtered_df = QueryFactory().create_query(df_viz.get_df_viz(), query_params)
+heat_map = HeatMapVisualization(filtered_df.filtered_df)
+heat_map.render_heat_map('DOW', '2018')
+heat_map.figure.show()
+
+
+#plot a heatmap DOW for a multiple years
+# query_params = {
+#     'year':[2015, 2016, 2017, 2018, 2019],
+#     'rating':['LOVE']
+# }
+
+# heat_map = HeatMapVisualization(df_viz.get_df_viz(), 5)
+
+# for year in query_params['year']:
+#   year_query_params = query_params
+#   year_query_params['year'] = [year]
+#   filtered_df = QueryFactory().create_query(df_viz.get_df_viz(), query_params)
+#   heat_map.df = filtered_df.filtered_df
+#   heat_map.render_heat_map('DOW', str(year))
 
 # heat_map.figure.show()
 
 
+
+###########################################################################################################################
 
 # plot a pie chart
 # query_params = {
@@ -93,7 +125,7 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 # pie_chart.figure.show()
 
 
-
+###########################################################################################################################
 # plot a bar chart - DOW
 # df = df_viz.get_df_viz()
 # years_to_plot = sorted(df['Play_Year'].dropna().unique())
@@ -111,8 +143,6 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 
 # bar_chart.figure.update_layout(xaxis =xaxis)
 # bar_chart.figure.show()
-
-
 
 # plot a bar chart - Month
 # df = df_viz.get_df_viz()

@@ -84,6 +84,7 @@ class HeatMapVisualization():
         self.height = 0
         self.row = 1
         self.data = None
+        self.xaxis = None
 
     def build_day_heat_map(self, title):
         '''
@@ -93,7 +94,7 @@ class HeatMapVisualization():
             y=self.df['Play_DOM'],
             x=self.df['Play_Month'],
             autobiny=False,
-            ybins=dict(start=0.5, end=31.5, size=1),
+            ybins=dict(start=1.5, end=31.5, size=1),
             autobinx=False,
             xbins=dict(start=0.5, end=12.5, size=1),
             z=self.df['Play_duration_in_minutes'],
@@ -105,25 +106,51 @@ class HeatMapVisualization():
             coloraxis="coloraxis"
         )
         self.data = hist
-        
+       
+    def build_week_heat_map(self, title):
+        '''
+            This function is in charge of building a single 2D Histogram trace.
+        '''
+        hist = go.Histogram2d(
+            y=self.df['Play_HOD'],
+            x=self.df['Play_DOW'],
+            autobiny=False,
+            ybins=dict(start=0.5, end=23.5, size=1),
+            autobinx=False,
+            xbins=dict(start=0.5, end=7.5, size=1),
+            z=self.df['Play_duration_in_minutes'],
+            histfunc="sum",
+            hovertemplate=
+            title +" - %{x}s, %{y}h<b><br>" +
+            "Time listening: %{z:,.0f} minutes<br>" +
+            "<extra></extra>",
+            coloraxis="coloraxis"
+        )
+        self.data = hist 
 
-    def render_heat_map(self, title):
-        self.build_day_heat_map(title)
+    def render_heat_map(self, type, title):
+        if type == 'DOM':
+            self.build_day_heat_map(title)
+            self.xaxis = dict(tickangle = -45, tickmode = 'array', tickvals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                ticktext = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'])
+        elif type == 'DOW':
+            self.build_week_heat_map(title)
+            self.xaxis = dict(tickangle = -45, tickmode = 'array', tickvals = [1, 2, 3, 4, 5, 6, 7], ticktext = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+
         self.figure.add_trace(self.data, row = self.row, col=1)
         self.height += 500
         self.update_figure_info()
         self.row +=1
 
     def update_figure_info(self):
-        self.figure.update_xaxes(tickangle = -45, tickmode = 'array', tickvals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-                     ticktext = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-                     row=self.row, col=1)
+        self.figure.update_xaxes(self.xaxis)
+        self.figure.update_yaxes(autorange="reversed")
 
         self.figure.update_layout(
             title=self.title,
             height = self.height,
             coloraxis=dict(colorscale='hot'),
-            showlegend=False
+            showlegend=False,
         )
         self.figure.update_xaxes(matches='x')
 
