@@ -83,6 +83,9 @@ class Parser():
         parsed_datetime_series = Utility.parse_date_time_column(self.play_activity_df, 'Activity date time')
         Utility.add_time_related_columns(self.play_activity_df, parsed_datetime_series, col_name_prefix='Play ')
 
+        # We remove year outliers (Apple Music started in 2015, whatever is reported before is a mistake)
+        self.play_activity_df = self.play_activity_df.drop(self.play_activity_df[self.play_activity_df['Play Year']< 2015].index)
+
         # Add partial listening column 
         play_duration = self.play_activity_df['Play Duration Milliseconds']
         media_duration = self.play_activity_df['Media Duration In Milliseconds']
@@ -97,10 +100,12 @@ class Parser():
         played_completely = self.play_activity_df['Played completely']
         self.compute_play_duration(activity_start, activity_end, played_completely, play_duration, media_duration)
 
-        # we remove outliers from this column, saying that if a value if above the 99th percentile,
+        # we remove outliers from this play duration column, saying that if a value if above the 99th percentile,
         # we drop it, and replace it by the duration of the media
         percentile = self.play_activity_df['Play duration in minutes'].quantile(0.99)
         self.remove_play_duration_outliers(self.play_activity_df['Play duration in minutes'], media_duration, percentile)
+
+
 
         #we can then remove the columns we do not need anymore!
         if drop_columns:
