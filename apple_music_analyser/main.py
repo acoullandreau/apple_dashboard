@@ -79,13 +79,13 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 # heat_map.figure.show()
 
 #plot a heatmap DOW for a single year
-query_params = {
-    'year':[2018],
-}
-filtered_df = QueryFactory().create_query(df_viz.get_df_viz(), query_params)
-heat_map = HeatMapVisualization(filtered_df.filtered_df)
-heat_map.render_heat_map('DOW', '2018')
-heat_map.figure.show()
+# query_params = {
+#     'year':[2018],
+# }
+# filtered_df = QueryFactory().create_query(df_viz.get_df_viz(), query_params)
+# heat_map = HeatMapVisualization(filtered_df.filtered_df)
+# heat_map.render_heat_map('DOW', '2018')
+# heat_map.figure.show()
 
 
 #plot a heatmap DOW for a multiple years

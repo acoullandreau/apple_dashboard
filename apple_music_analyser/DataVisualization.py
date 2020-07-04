@@ -114,10 +114,7 @@ class HeatMapVisualization():
         hist = go.Histogram2d(
             y=self.df['Play_HOD'],
             x=self.df['Play_DOW'],
-            autobiny=False,
             ybins=dict(start=0.5, end=23.5, size=1),
-            autobinx=False,
-            xbins=dict(start=0.5, end=7.5, size=1),
             z=self.df['Play_duration_in_minutes'],
             histfunc="sum",
             hovertemplate=
@@ -135,7 +132,8 @@ class HeatMapVisualization():
                 ticktext = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'])
         elif type == 'DOW':
             self.build_week_heat_map(title)
-            self.xaxis = dict(tickangle = -45, tickmode = 'array', tickvals = [1, 2, 3, 4, 5, 6, 7], ticktext = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+            #self.xaxis = dict(tickangle = -45, tickmode = 'array', tickvals = [0, 1, 2, 3, 4, 5, 6])
+            self.xaxis = dict(tickangle = -45, categoryorder='array', categoryarray = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
 
         self.figure.add_trace(self.data, row = self.row, col=1)
         self.height += 500
