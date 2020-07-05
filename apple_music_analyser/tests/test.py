@@ -4,9 +4,9 @@ from unittest.mock import MagicMock
 
 from apple_music_analyser.Utility import Utility
 from apple_music_analyser.Track import Track
+from apple_music_analyser.Query import Query, QueryFactory
 #from apple_music_analyser.VisualizationDataframe import VisualizationDataframe
 #from apple_music_analyser.DataVisualization import SunburstVisualization, RankingListVisualization, HeatMapVisualization, PieChartVisualization, BarChartVisualization
-#from apple_music_analyser.Query import Query, QueryFactory
 
 
 class TestUtils(unittest.TestCase):
@@ -152,6 +152,65 @@ class TestTrack(unittest.TestCase):
         self.track = None
 
 
+
+class TestQueryFactory(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(self):
+        df = {'Artist':['Artist_1', 'Artist_2'], 'Title': ['Title_1', 'Title_2'], 
+            'Offline':[False, True], 'Play_Year':[2020, 2019], 
+            'Played_completely':[True, False], 'Track_origin':['library', 'other'],
+            'Library_Track':[True, False], 'Rating':['LOVE', 'Unknown'],
+            'Genres':['Genre_1', 'Genre_2']
+        }
+        self.reference_df = pd.DataFrame.from_dict(df)
+        self.query_factory = QueryFactory()
+
+    def test_init_QueryFactory(self):
+        self.assertTrue(isinstance(self.query_factory, QueryFactory))
+
+    def test_query_creator_without_params(self):
+        query = self.query_factory.create_query(self.reference_df)
+        query_params_default = {
+                'year':self.reference_df['Play_Year'].unique(),
+                'genre':[],
+                'artist':[],
+                'title':[],
+                'rating':[],
+                'origin':[],
+                'offline':[],
+                'library':[],
+                'skipped':[],
+            }
+        self.assertTrue(isinstance(query, Query))
+        self.assertEqual(query.reference_df.shape, self.reference_df.shape)
+        self.assertEqual(query.reference_df.columns.tolist(), self.reference_df.columns.tolist())
+        self.assertEqual(len(query.reference_df['Artist']), 2)
+        self.assertEqual(len(query.query_params), len(query_params_default))
+        self.assertEqual(len(query.query_params['year']), 2)
+        self.assertEqual(query.query_params['genre'], [])
+
+    # def test_query_creator_with_params(self):
+    #     query_params = {
+    #             'year':reference_df['Play_Year'].unique(),
+    #             'genre':['Genre'],
+    #             'artist':['Artist'],
+    #             'title':['Title'],
+    #             'rating':['LOVE'],
+    #             'origin':['Library'],
+    #             'offline':[False],
+    #             'library':[True],
+    #             'skipped':[False],
+    #         }
+    #     self.query.create_query(self.reference_df, query_params)
+    #     self.assertTrue(isinstance(self.query, Query))
+    #     self.assertEqual(self.query.reference_df, self.reference_df)
+    #     self.assertEqual(self.query.query_params, query_params)
+
+
+    @classmethod
+    def tearDownClass(self):
+        self.reference_df = None
 
 
 if __name__ == '__main__':

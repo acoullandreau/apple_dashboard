@@ -14,11 +14,11 @@ start0 = time.time()
 #df_viz = VisualizationDataframe(input_df)
 #Utility.save_to_pickle(df_viz, 'df_viz.pkl')
 
-#df_viz = Utility.load_from_pickle('df_viz.pkl')
+df_viz = Utility.load_from_pickle('df_viz.pkl')
 
 
 df = df_viz.get_df_viz()
-print(df['Rating'].value_counts())
+print(df.iloc[1])
 
 
 
