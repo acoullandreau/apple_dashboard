@@ -1,9 +1,9 @@
 import pandas as pd
 import pickle
 
-from Utility import Utility
-from Parser import Parser
-from Process import ProcessTracks, TrackSummaryObject
+from apple_music_analyser.Utility import Utility
+from apple_music_analyser.Parser import Parser
+from apple_music_analyser.Process import ProcessTracks, TrackSummaryObject
 
 class VisualizationDataframe():
 

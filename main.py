@@ -1,7 +1,7 @@
-from VisualizationDataframe import VisualizationDataframe
-from Utility import Utility
-from DataVisualization import SunburstVisualization, RankingListVisualization, HeatMapVisualization, PieChartVisualization, BarChartVisualization
-from Query import Query, QueryFactory
+from apple_music_analyser.VisualizationDataframe import VisualizationDataframe
+from apple_music_analyser.Utility import Utility
+from apple_music_analyser.DataVisualization import SunburstVisualization, RankingListVisualization, HeatMapVisualization, PieChartVisualization, BarChartVisualization
+from apple_music_analyser.Query import Query, QueryFactory
 
 import time
 
@@ -15,6 +15,11 @@ start0 = time.time()
 #Utility.save_to_pickle(df_viz, 'df_viz.pkl')
 
 df_viz = Utility.load_from_pickle('df_viz.pkl')
+
+
+df = df_viz.get_df_viz()
+print(df['Play_date_time'].tolist())
+
 
 
 
@@ -41,11 +46,11 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 
 ###########################################################################################################################
 #get a ranking dict
+# df = df_viz.get_df_viz()
 # query_params = {
-#     'year':[2017, 2018, 2019],
-#     'rating':['LOVE']
+#     'year':sorted(df['Play_Year'].dropna().unique()),
 # }
-# ranking_dict = df_viz.track_summary_objects.build_ranking_dict_per_year(df_viz.get_df_viz(), 'Artist', query_params)
+# ranking_dict = df_viz.track_summary_objects.build_ranking_dict_per_year(df, 'Genres', query_params)
 # ranking = RankingListVisualization(ranking_dict, 5)
 # print(ranking.ranked_dict)
 
@@ -91,7 +96,6 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 #plot a heatmap DOW for a multiple years
 # query_params = {
 #     'year':[2015, 2016, 2017, 2018, 2019],
-#     'rating':['LOVE']
 # }
 
 # heat_map = HeatMapVisualization(df_viz.get_df_viz(), 5)
@@ -104,7 +108,6 @@ df_viz = Utility.load_from_pickle('df_viz.pkl')
 #   heat_map.render_heat_map('DOW', str(year))
 
 # heat_map.figure.show()
-
 
 
 ###########################################################################################################################

@@ -1,6 +1,6 @@
-from Query import Query, QueryFactory
-from Track import Track
-from Utility import Utility
+from apple_music_analyser.Query import Query, QueryFactory
+from apple_music_analyser.Track import Track
+from apple_music_analyser.Utility import Utility
 
 class ProcessTracks():
 

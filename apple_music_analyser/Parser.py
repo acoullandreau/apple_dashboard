@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
-from Utility import Utility
-import time
+from apple_music_analyser.Utility import Utility
 
 class Parser():
 

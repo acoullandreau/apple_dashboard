@@ -1,7 +1,7 @@
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
-from Utility import Utility
+from apple_music_analyser.Utility import Utility
 
 class SunburstVisualization():
 

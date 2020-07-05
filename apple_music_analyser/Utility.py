@@ -8,41 +8,45 @@ class Utility():
     @staticmethod
     def get_df_from_archive(archive_path):
 
-        archive_files = ZipFile(archive_path)
+        if archive_path:
+            archive_files = ZipFile(archive_path)
 
-        target_files = {
-            'identifier_infos_path' : 'Apple_Media_Services/Apple Music Activity/Identifier Information.json.zip',
-            'library_tracks_path' : 'Apple_Media_Services/Apple Music Activity/Apple Music Library Tracks.json.zip',
-            'library_activity_path': 'Apple_Media_Services/Apple Music Activity/Apple Music Library Activity.json.zip',
-            'likes_dislikes_path' : 'Apple_Media_Services/Apple Music Activity/Apple Music Likes and Dislikes.csv',
-            'play_activity_path': 'Apple_Media_Services/Apple Music Activity/Apple Music Play Activity.csv'
-        }
+            target_files = {
+                'identifier_infos_path' : 'Apple_Media_Services/Apple Music Activity/Identifier Information.json.zip',
+                'library_tracks_path' : 'Apple_Media_Services/Apple Music Activity/Apple Music Library Tracks.json.zip',
+                'library_activity_path': 'Apple_Media_Services/Apple Music Activity/Apple Music Library Activity.json.zip',
+                'likes_dislikes_path' : 'Apple_Media_Services/Apple Music Activity/Apple Music Likes and Dislikes.csv',
+                'play_activity_path': 'Apple_Media_Services/Apple Music Activity/Apple Music Play Activity.csv'
+            }
 
-        dataframes = {}
+            dataframes = {}
 
-        if archive_files.testzip() == None:
-            identifier_infos_df = Utility.get_df_from_file(archive_files.open(target_files['identifier_infos_path']))
-            dataframes['identifier_infos_df']=identifier_infos_df
+            if archive_files.testzip() == None:
+                identifier_infos_df = Utility.get_df_from_file(archive_files.open(target_files['identifier_infos_path']))
+                dataframes['identifier_infos_df']=identifier_infos_df
 
-            library_tracks_df = Utility.get_df_from_file(archive_files.open(target_files['library_tracks_path']))
-            dataframes['library_tracks_df']=library_tracks_df
+                library_tracks_df = Utility.get_df_from_file(archive_files.open(target_files['library_tracks_path']))
+                dataframes['library_tracks_df']=library_tracks_df
 
-            library_activity_df = Utility.get_df_from_file(archive_files.open(target_files['library_activity_path']))
-            dataframes['library_activity_df']=library_activity_df
+                library_activity_df = Utility.get_df_from_file(archive_files.open(target_files['library_activity_path']))
+                dataframes['library_activity_df']=library_activity_df
 
-            likes_dislikes_df = Utility.get_df_from_file(archive_files.open(target_files['likes_dislikes_path']))
-            dataframes['likes_dislikes_df']=likes_dislikes_df
+                likes_dislikes_df = Utility.get_df_from_file(archive_files.open(target_files['likes_dislikes_path']))
+                dataframes['likes_dislikes_df']=likes_dislikes_df
 
-            play_activity_df = Utility.get_df_from_file(archive_files.open(target_files['play_activity_path']))
-            #play_activity_df = []
-            dataframes['play_activity_df']=play_activity_df
+                play_activity_df = Utility.get_df_from_file(archive_files.open(target_files['play_activity_path']))
+                #play_activity_df = []
+                dataframes['play_activity_df']=play_activity_df
 
-            archive_files.close()
+                archive_files.close()
 
+            else:
+                print('Please verify that you are passing a valid zip file')
+
+            return dataframes
         else:
             print('Please verify that you are passing a valid zip file')
-
-        return dataframes
+            return {}
 
     @staticmethod
     def get_df_from_file(file_path):
@@ -77,7 +81,7 @@ class Utility():
     @staticmethod
     def parse_date_time_column(df, input_timestamp_col):
         datetime_col = pd.to_datetime(df[input_timestamp_col])
-        year, month, dom, dow, hod = Utility.extract_time_info_from_datetime(df, datetime_col)
+        year, month, dom, dow, hod = Utility.extract_time_info_from_datetime(datetime_col)
 
         datetime_series = {
             'datetime':datetime_col,
@@ -92,7 +96,7 @@ class Utility():
 
 
     @staticmethod
-    def extract_time_info_from_datetime(df, datetime_col):
+    def extract_time_info_from_datetime(datetime_col):
         year=datetime_col.dt.year
         month=datetime_col.dt.month
         dom=datetime_col.dt.day
