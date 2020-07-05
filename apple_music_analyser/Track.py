@@ -44,7 +44,7 @@ class Track():
 
     def set_rating(self, rating):
         if rating == 'LOVE' or rating == 'LIKE':
-            if rating not in self.rating:
+            if 'LOVE' not in self.rating:
                 self.rating.append(rating)
         elif rating == 'DISLIKE':
             if rating not in self.rating:
