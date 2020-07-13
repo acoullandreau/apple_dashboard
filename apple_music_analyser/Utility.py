@@ -7,17 +7,26 @@ class Utility():
 
     @staticmethod
     def get_df_from_archive(archive_path):
-
         if archive_path:
             archive_files = ZipFile(archive_path)
-
+            input_folder_name = archive_path.split('.')[0]
+            
             target_files = {
-                'identifier_infos_path' : 'Apple_Media_Services/Apple Music Activity/Identifier Information.json.zip',
-                'library_tracks_path' : 'Apple_Media_Services/Apple Music Activity/Apple Music Library Tracks.json.zip',
-                'library_activity_path': 'Apple_Media_Services/Apple Music Activity/Apple Music Library Activity.json.zip',
-                'likes_dislikes_path' : 'Apple_Media_Services/Apple Music Activity/Apple Music Likes and Dislikes.csv',
-                'play_activity_path': 'Apple_Media_Services/Apple Music Activity/Apple Music Play Activity.csv'
+                'identifier_infos_path' : '{0}/Apple Music Activity/Identifier Information.json.zip'.format(input_folder_name),
+                'library_tracks_path' : '{0}/Apple Music Activity/Apple Music Library Tracks.json.zip'.format(input_folder_name),
+                'library_activity_path': '{0}/Apple Music Activity/Apple Music Library Activity.json.zip'.format(input_folder_name),
+                'likes_dislikes_path' : '{0}/Apple Music Activity/Apple Music Likes and Dislikes.csv'.format(input_folder_name),
+                'play_activity_path': '{0}/Apple Music Activity/Apple Music Play Activity.csv'.format(input_folder_name)
             }
+
+            # target_files = {
+            #     'identifier_infos_path' : 'Apple_Media_Services/Apple Music Activity/Identifier Information.json.zip',
+            #     'library_tracks_path' : 'Apple_Media_Services/Apple Music Activity/Apple Music Library Tracks.json.zip',
+            #     'library_activity_path': 'Apple_Media_Services/Apple Music Activity/Apple Music Library Activity.json.zip',
+            #     'likes_dislikes_path' : 'Apple_Media_Services/Apple Music Activity/Apple Music Likes and Dislikes.csv',
+            #     'play_activity_path': 'Apple_Media_Services/Apple Music Activity/Apple Music Play Activity.csv'
+            # }
+
 
             dataframes = {}
 

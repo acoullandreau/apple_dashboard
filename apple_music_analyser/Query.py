@@ -11,9 +11,9 @@ class QueryFactory():
                 'title':[],
                 'rating':[],
                 'origin':[],
-                'offline':[],
-                'library':[],
-                'skipped':[],
+                'offline':None,
+                'library':None,
+                'skipped':None,
             }
             return Query(reference_df, query_params_default)
 
@@ -114,7 +114,7 @@ class Query():
         return query_element 
     
     @staticmethod
-    def build_boolean_query_element(category, query_values):
+    def build_boolean_query_element(category, query_value):
         '''
             This function builds the string that is used as a query to filter the dataframe.
             As with boolean category the number of values can only be at most 2 (True, False),
@@ -126,13 +126,7 @@ class Query():
             Example:
             library_track False OR True
         '''
-        query_element = ''
-        if len(query_values) == 1:
-            query_element = query_element + '{0}.isin([{1}])'.format(category, query_values[0])
-        else:
-            first_item = '{0}.isin([{1}]'.format(category, query_values[0])
-            last_item = '{0}.isin([{1}])'.format(category, query_values[-1])
-            query_element = query_element + '(' + first_item + '|' + last_item + ')'
+        query_element = '{0}.isin([{1}])'.format(category, query_value)
         
         return query_element
 
@@ -165,7 +159,10 @@ class Query():
                 elif query_category == 'library':
                     query = query + Query.build_boolean_query_element('Library_Track', target_values)
                 elif query_category == 'skipped':
-                    query = query + Query.build_boolean_query_element('Played_completely', target_values)
+                    if target_values is True:
+                        query = query + Query.build_boolean_query_element('Played_completely', False)
+                    else:
+                        query = query + Query.build_boolean_query_element('Played_completely', True)
         return query
 
 

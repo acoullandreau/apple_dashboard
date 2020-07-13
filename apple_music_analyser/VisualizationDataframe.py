@@ -54,11 +54,11 @@ class VisualizationDataframe():
     def process_tracks_in_df(self):
         # we process the library tracks
         self.process_tracks.process_library_tracks_df(self.library_tracks_df)
-        # we process the identifier infos
+        # # we process the identifier infos
         self.process_tracks.process_identifier_df(self.identifier_infos_df)
-        # we process the play activity
+        # # we process the play activity
         self.process_tracks.process_play_df(self.play_activity_df)
-        # we process the likes dislikes
+        # # we process the likes dislikes
         self.process_tracks.process_likes_dislikes_df(self.likes_dislikes_df)
 
     def build_df_visualisation(self, target_df):
