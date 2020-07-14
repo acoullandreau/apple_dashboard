@@ -439,11 +439,22 @@ class TestParser(unittest.TestCase):
         self.assertEqual(df.iloc[3, 0], 2)
 
     def test_parse_play_activity_df(self):
-        return None
-
-#parse_play_activity_df
-#pb with column with timestamp
-
+        shape_input_df = self.play_activity_df.shape
+        result = Parser.parse_play_activity_df(self.play_activity_df)
+        self.assertTrue(isinstance(result, pd.DataFrame))
+        #we expect row with date before 2015 to be dropped
+        self.assertEqual(result.shape[0], shape_input_df[0] -1)
+        self.assertEqual(result.shape[1], shape_input_df[1] -14)
+        self.assertIn('Play date time', result.columns)
+        self.assertIn('Play Year', result.columns)
+        self.assertIn('Play Month', result.columns)
+        self.assertIn('Play DOM', result.columns)
+        self.assertIn('Play DOW', result.columns)
+        self.assertIn('Play HOD', result.columns)
+        self.assertIn('Play HOD', result.columns)
+        self.assertIn('Played completely', result.columns)
+        self.assertIn('Track origin', result.columns)
+        self.assertIn('Play duration in minutes', result.columns)
 
     @classmethod
     def tearDownClass(self):
