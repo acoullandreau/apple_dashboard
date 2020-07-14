@@ -6,10 +6,11 @@ class Parser():
 
     def __init__(self, source_files):
         self.source_files = source_files
-        self.source_dataframes = self.parse_input_df()
+        self.source_dataframes = self.parse_input_df(self.source_files)
         self.parse_source_dataframes()
 
-    def parse_input_df(self):
+    @staticmethod
+    def parse_input_df(source_files):
 
         error_message_bad_input = ("Please ensure that the input_df object has the following structure...\n"
 
@@ -19,16 +20,16 @@ class Parser():
         '...And that the values in this dictionary are pandas dataframes.')
 
         dataframes = {}
-        if len(self.source_files) != 5:
+        if len(source_files) != 5:
             print(error_message_bad_input)
 
         else:
-            if Utility.validate_input_df_files(self.source_files):
-                dataframes['likes_dislikes_df'] = self.source_files['likes_dislikes_df']
-                dataframes['play_activity_df'] = self.source_files['play_activity_df']
-                dataframes['identifier_infos_df'] = self.source_files['identifier_infos_df']
-                dataframes['library_tracks_df'] = self.source_files['library_tracks_df']
-                dataframes['library_activity_df'] = self.source_files['library_activity_df']
+            if Utility.validate_input_df_files(source_files):
+                dataframes['likes_dislikes_df'] = source_files['likes_dislikes_df']
+                dataframes['play_activity_df'] = source_files['play_activity_df']
+                dataframes['identifier_infos_df'] = source_files['identifier_infos_df']
+                dataframes['library_tracks_df'] = source_files['library_tracks_df']
+                dataframes['library_activity_df'] = source_files['library_activity_df']
             else:
                 print(error_message_bad_input)
         
@@ -44,6 +45,7 @@ class Parser():
             self.library_activity_df = self.parse_library_activity_df(self.source_dataframes['library_activity_df'])
         else:
             print('No source dataframes found in input.')
+
 
     @staticmethod
     def parse_library_activity_df(library_activity_df):
@@ -104,7 +106,7 @@ class Parser():
 
         #we can then remove the columns we do not need anymore!
         if drop_columns:
-            play_activity_df = play_activity_df.drop(columns_to_drop, axis=1)
+            play_activity_df = play_activity_df.drop(columns_to_drop, axis=1, errors='ignore')
 
         return play_activity_df
 
@@ -122,7 +124,7 @@ class Parser():
         'Movement Name', 'Movement Number', 'Movement Count',
         'Display Work Name', 'Copyright', 'Playlist Only Track',
         'Sort Album Artist', 'Sort Composer']
-        library_tracks_df = library_tracks_infos_df.drop(columns_to_drop, axis=1)
+        library_tracks_df = library_tracks_infos_df.drop(columns_to_drop, axis=1, errors='ignore')
         return library_tracks_df
 
     @staticmethod

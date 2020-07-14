@@ -66,7 +66,7 @@ class Utility():
         elif file_path.name.endswith('.json'):
             df = pd.read_json(file_path)
         elif file_path.name.endswith('.csv'):
-            df = pd.read_csv(file_path, error_bad_lines=False)
+            df = pd.read_csv(file_path, error_bad_lines=False, warn_bad_lines=False)
         else:
             print('Please provide a file with extension .csv, .json or .json.zip')
         
