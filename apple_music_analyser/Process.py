@@ -34,7 +34,7 @@ class ProcessTracks():
     def get_increment(self):
         return self.increment
 
-    def update_track_instance(self, origin_df, track_instance, index, row, title_artist):
+    def update_track_instance(self, origin_df, track_instance, index, row):
         if origin_df == 'play_activity_df':
             track_instance.update_track_from_play_activity(index, row)
             if row['Genre'] not in self.genres_list:
@@ -104,7 +104,7 @@ class ProcessTracks():
                             #we instantiate the Track object
                             track_instance = Track(self.increment)
                             track_instance.instantiate_track(title, artist)
-                            self.update_track_instance('library_tracks_df', track_instance, index, row, title_artist)
+                            self.update_track_instance('library_tracks_df', track_instance, index, row)
                             self.track_instance_dict[title_artist] = track_instance
                             self.increment += 1
 
@@ -112,7 +112,7 @@ class ProcessTracks():
                             track_instance = titles_comparison_result
                             if not track_instance.has_title_name(title):
                                 track_instance.add_title(title)
-                            self.update_track_instance('library_tracks_df', track_instance, index, row, title_artist)
+                            self.update_track_instance('library_tracks_df', track_instance, index, row)
                             self.track_instance_dict[title_artist] = track_instance
                             self.artist_tracks_titles[artist].append(title)
                     
@@ -120,14 +120,14 @@ class ProcessTracks():
                         #there was no close match, and the song was never seen, so we instantiate a new Track
                         track_instance = Track(self.increment)
                         track_instance.instantiate_track(title, artist)
-                        self.update_track_instance('library_tracks_df', track_instance, index, row, title_artist)
+                        self.update_track_instance('library_tracks_df', track_instance, index, row)
                         self.track_instance_dict[title_artist] = track_instance
                         self.increment += 1
 
 
                 else:
                     track_instance = self.track_instance_dict[title_artist]
-                    self.update_track_instance('library_tracks_df', track_instance, index, row, title_artist)
+                    self.update_track_instance('library_tracks_df', track_instance, index, row)
 
 
                 #we update the artist/track names dictionnary
@@ -202,7 +202,7 @@ class ProcessTracks():
             title_artist = Utility.concat_title_artist(title, artist)
             if title_artist in self.track_instance_dict.keys():
                 track_instance = self.track_instance_dict[title_artist]
-                self.update_track_instance('play_activity_df', track_instance, index, row, title_artist)
+                self.update_track_instance('play_activity_df', track_instance, index, row)
 
             else:
                 # if we had no match with title and artist, we look for similarity in the title for the artist
@@ -212,9 +212,10 @@ class ProcessTracks():
                         #we instantiate the Track object
                         track_instance = Track(self.increment)
                         track_instance.instantiate_track(title, artist)
-                        self.update_track_instance('play_activity_df', track_instance, index, row, title_artist)
-                        #we update the dictionary that keeps track of our instances, and increment
+                        self.update_track_instance('play_activity_df', track_instance, index, row)
+                        #we update the dictionary that keeps track of our instances, titles of artists, and increment
                         self.track_instance_dict[title_artist] = track_instance
+                        self.artist_tracks_titles[artist].append(title)
                         self.increment+=1
 
                     else:
@@ -235,7 +236,7 @@ class ProcessTracks():
                     #we instantiate the Track object
                     track_instance = Track(self.increment)
                     track_instance.instantiate_track(title, artist)
-                    self.update_track_instance('play_activity_df', track_instance, index, row, title_artist)
+                    self.update_track_instance('play_activity_df', track_instance, index, row)
 
                     #we update the dictionary that keeps track of our instances, and increment
                     self.track_instance_dict[title_artist] = track_instance
@@ -304,7 +305,6 @@ class ProcessTracks():
                         if titles_comparison_result == 'No match':
                             #we add the item to the items_not_matched
                             self.items_not_matched['likes_dislikes'].append(index)
-                            #continue
                         else:
                             track_instance = titles_comparison_result
                             if not track_instance.has_title_name(title):
