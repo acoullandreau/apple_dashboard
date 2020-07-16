@@ -486,9 +486,9 @@ class TestParser(unittest.TestCase):
 class TestProcess(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        input_df = Utility.get_df_from_archive('test_df.zip')
-        self.parser = Parser(input_df)
+    def setUp(self):
+        self.input_df = Utility.get_df_from_archive('test_df.zip')
+        self.parser = Parser(self.input_df)
         self.likes_dislikes_df = self.parser.likes_dislikes_df
         self.play_activity_df = self.parser.play_activity_df
         self.identifier_infos_df = self.parser.identifier_infos_df
@@ -511,28 +511,24 @@ class TestProcess(unittest.TestCase):
         result = self.process.get_track_instance_dict()
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(len(result), 2)
-        self.process.track_instance_dict = {}
 
     def test_get_artist_tracks_titles(self):
         self.process.artist_tracks_titles = {'key':'value', 'key_2':'value_2'}
         result = self.process.get_artist_tracks_titles()
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(len(result), 2)
-        self.process.artist_tracks_titles = {}
 
     def test_get_increment(self):
         self.process.increment = 1
         result = self.process.get_increment()
         self.assertTrue(isinstance(result, int))
         self.assertEqual(result, 1)
-        self.process.increment = 0
 
     def test_get_genres_list(self):
         self.process.genres_list = ['Genre', 'Other_genre']
         result = self.process.get_genres_list()
         self.assertTrue(isinstance(result, list))
         self.assertEqual(len(result), 2)
-        self.process.genres_list = []
 
     def test_get_items_not_matched(self):
         self.process.items_not_matched = {'library_tracks':['item'], 'identifier_info':['item', 'item_2'],
@@ -543,8 +539,6 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(list(result.keys()), ['library_tracks', 'identifier_info', 'play_activity', 'likes_dislikes'])
         self.assertEqual(len(result['library_tracks']), 1)
         self.assertEqual(len(result['identifier_info']), 2)
-        self.process.items_not_matched = {'library_tracks':[], 'identifier_info':[],
-                             'play_activity':[], 'likes_dislikes':[]}
 
 
     def test_compare_titles_for_artist(self):
@@ -554,8 +548,6 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(result_no_match, 'No match')
         result_match = self.process.compare_titles_for_artist('Artist_1', 'Title_2')
         self.assertTrue(isinstance(result_match, Track))
-        self.process.artist_tracks_titles = {}
-        self.process.track_instance_dict = {}
 
 
     def test_update_track_instance_play(self):
@@ -565,9 +557,6 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(self.process.genres_list, ['Soundtrack'])
         self.assertEqual(self.track_instance.genre, ['Soundtrack'])
         self.assertEqual(self.track_instance.appearances, [{'source': 'play_activity', 'df_index': 50}])
-        self.process.genres_list = []
-        self.track_instance.genre = []
-        self.track_instance.appearances = []
 
     def test_update_track_instance_lib(self):
         index_lib = 30
@@ -576,9 +565,6 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(self.process.genres_list, ['French Pop'])
         self.assertEqual(self.track_instance.genre, ['French Pop'])
         self.assertEqual(self.track_instance.appearances, [{'source': 'library_tracks', 'df_index': 30}])
-        self.process.genres_list = []
-        self.track_instance.genre = []
-        self.track_instance.appearances = []
 
     # def test_update_track_instance_other(self):
     #     index_other = 10
@@ -597,13 +583,6 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(len(self.process.artist_tracks_titles['Céline Dion']), 3)
         self.assertEqual(len(self.process.genres_list), 16)
         self.assertEqual(self.process.items_not_matched['library_tracks'], [])
-        self.process.genres_list = []
-        self.process.artist_tracks_titles = {}
-        self.process.track_instance_dict = {}
-        self.process.increment = 0
-        self.process.items_not_matched = {'library_tracks':[], 'identifier_info':[],
-                     'play_activity':[], 'likes_dislikes':[]}
-
 
     def test_process_identifier_df(self):
         # we expect modifications of the process objects only if they are not empty
@@ -633,12 +612,6 @@ class TestProcess(unittest.TestCase):
         # these info come from other df, so they should remain empty
         self.assertEqual(self.process.track_instance_dict['The Unforgiven && Metallica'].rating, [])
         self.assertEqual(self.process.track_instance_dict['The Unforgiven && Metallica'].apple_music_id, [])
-        self.process.genres_list = []
-        self.process.artist_tracks_titles = {}
-        self.process.track_instance_dict = {}
-        self.process.increment = 0
-        self.process.items_not_matched = {'library_tracks':[], 'identifier_info':[],
-                     'play_activity':[], 'likes_dislikes':[]}
 
 
     def test_process_likes_dislikes_df(self):
@@ -650,6 +623,7 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(self.process.artist_tracks_titles, {})
         self.assertEqual(self.process.increment, 0)
         self.assertEqual(len(self.process.items_not_matched['likes_dislikes']), self.likes_dislikes_df.shape[0])
+
 
     def test_process_all_df(self):
         self.process.process_library_tracks_df(self.library_tracks_df)
@@ -702,18 +676,10 @@ class TestProcess(unittest.TestCase):
         #let's note here that this value has to be also available in library_tracks_df, as the match from identifier_infos_df are made on the ids and not the titles
         ids_from_library = [int(x) for x in self.library_tracks_df[self.library_tracks_df['Title']=='Nicolas Le Floch - Générique'][['Apple Music Track Identifier', 'Track Identifier', 'Purchased Track Identifier', 'Tag Matched Track Identifier']].values[0]]
         self.assertIn(int(self.process.track_instance_dict['Nicolas Le Floch - Générique && Stéphane Moucha'].apple_music_id[0]), ids_from_library)
-        #we reset back the objects of the Process class
-        self.process.increment = 0
-        self.process.genres_list = []
-        self.process.artist_tracks_titles = {}
-        self.process.track_instance_dict = {}
-        self.process.items_not_matched = {'library_tracks':[], 'identifier_info':[],
-                     'play_activity':[], 'likes_dislikes':[]}
-
 
 
     @classmethod
-    def tearDownClass(self):
+    def tearDown(self):
         self.process = None
         self.parser = None
         self.likes_dislikes_df = None
@@ -722,273 +688,6 @@ class TestProcess(unittest.TestCase):
         self.library_tracks_df = None
         self.library_activity_df = None
         self.track_instance = None
-
-
-
-    # def process_library_tracks_df(self, library_df):
-    #     '''
-    #         This function goes through each row of the library tracks dataframe, creating and updating
-    #         track instances as they appear.
-    #         As this is the first dataframe we go through, we want to create new instances whenever
-    #         we are not facing unknown songs (NaN as a title)
-    #         The logic works as follows, knowing that we do this for each row of the dataframe:
-    #             - we look only at rows with a title different than NaN, and we set the artist to
-    #             'No Artist' if the artist is also Nan
-    #             - if the track is not in the dictionary of track instances, it means that we never
-    #             saw the combination title/artist of this row. So two options here:
-    #                 - either we know this artist and we can find a similar title in the artist dict, and in
-    #                 this case we update the existing track using update_track_from_library
-    #                 - or we do not know this artist, or we do not find a close match of title for this artist
-    #                 and in this case we create a new track instance using instantiate_track and then
-    #                 update_track_from_library
-    #             - else, we update the existing track using update_track_from_library
-    #     '''
-    #     for index, row in library_df.iterrows():
-    #         if str(row['Title']) != 'nan':
-    #             title = row['Title']
-    #             if str(row['Artist']) != 'nan':
-    #                 artist = row['Artist']
-    #             else:
-    #                 artist = 'No Artist'
-
-    #             title_artist = Utility.concat_title_artist(title, artist)
-
-    #             if title_artist not in self.track_instance_dict.keys():
-    #                 if artist in self.artist_tracks_titles.keys():
-    #                     titles_comparison_result = self.compare_titles_for_artist(artist, title)
-
-    #                     if titles_comparison_result == 'No match':
-    #                         #we instantiate the Track object
-    #                         track_instance = Track(self.increment)
-    #                         track_instance.instantiate_track(title, artist)
-    #                         self.update_track_instance('library_tracks_df', track_instance, index, row, title_artist)
-    #                         self.track_instance_dict[title_artist] = track_instance
-    #                         self.increment += 1
-
-    #                     else:
-    #                         track_instance = titles_comparison_result
-    #                         if not track_instance.has_title_name(title):
-    #                             track_instance.add_title(title)
-    #                         self.update_track_instance('library_tracks_df', track_instance, index, row, title_artist)
-    #                         self.track_instance_dict[title_artist] = track_instance
-    #                         self.artist_tracks_titles[artist].append(title)
-                    
-    #                 else:
-    #                     #there was no close match, and the song was never seen, so we instantiate a new Track
-    #                     track_instance = Track(self.increment)
-    #                     track_instance.instantiate_track(title, artist)
-    #                     self.update_track_instance('library_tracks_df', track_instance, index, row, title_artist)
-    #                     self.track_instance_dict[title_artist] = track_instance
-    #                     self.increment += 1
-
-
-    #             else:
-    #                 track_instance = self.track_instance_dict[title_artist]
-    #                 self.update_track_instance('library_tracks_df', track_instance, index, row, title_artist)
-
-
-    #             #we update the artist/track names dictionnary
-    #             if artist not in self.artist_tracks_titles:
-    #                 self.artist_tracks_titles[artist]=[]
-    #             if title not in self.artist_tracks_titles[artist]:
-    #                 self.artist_tracks_titles[artist].append(title)
-    #         else:
-    #             self.items_not_matched['library_tracks'].append(index)
-
-
-
-    # def process_identifier_df(self, identifier_df):
-    #     '''
-    #         This function goes through each row of the identifier information dataframe, updating
-    #         track instances as they appear.
-    #         Unlike for the tracks dataframe, we have very limited information here, just an identifier
-    #         and a title (not even an artist name). So we need to have a different approach, only
-    #         based on the identifiers. Which may excluse some songs... But prevents false positives.
-    #         The logic works as follows, knowing that we do this for each row of the dataframe:
-    #             - we loop through all the track instances we created so far, and see if any of their 
-    #             identifier matches the id of the row we are looking at
-    #             - if it matches, and if we didn't already have the associated title, we add it to the
-    #             list of titles of that track
-    #             - otherwise, we add it to the tracks we could not match and we ignored.
-    #     '''
-    #     for index, row in identifier_df.iterrows():
-    #         found_match = False
-    #         for title_name in self.track_instance_dict.keys():
-    #             track_instance = self.track_instance_dict[title_name]
-    #             if row['Identifier'] in track_instance.apple_music_id:
-    #                 track_instance.add_appearance({'source': 'identifier_info', 'df_index':index})
-    #                 if not track_instance.has_title_name(row['Title']):
-    #                     track_instance.add_title(row['Title'])
-    #                 found_match = True
-    #                 break
-    #         if found_match is False:
-    #             self.items_not_matched['identifier_info'].append((index, row['Identifier']))
-
-
-    # def process_play_df(self, play_activity_df):
-    #     '''
-    #         This function goes through each row of the play activity dataframe, creating and updating
-    #         track instances as they appear.
-    #         As this is the dataframe we are able to get the most information from, we want to create
-    #         new instances whenever we are not facing unknown songs (NaN as a title).The approach is
-    #         very similar to the one used for the library tracks.
-            
-    #         The logic works as follows, knowing that we do this for each row of the dataframe:
-    #             - if the track is in the dictionary of track instances, we update the existing
-    #             track using update_track_from_play_activity
-    #             - else, we have two options :
-    #                 - either we know this artist and we can find a similar title in the artist dict,
-    #                 and in this case we update the existing track using update_track_from_play_activity
-    #                 - or we do not know this artist, or we do not find a close match of title for this
-    #                 artist and in this case we create a new track instance using instantiate_track and
-    #                 then update_track_from_play_activity
-    #     '''
-    #     for index, row in play_activity_df.iterrows():
-    #         #we want to look only at rows where the name of the song is available
-    #         if str(row['Title']) != 'nan':
-    #             title = row['Title']
-    #             if str(row['Artist']) != 'nan':
-    #                 artist = row['Artist']
-    #             else:
-    #                 artist = 'No Artist'
-    #         else:
-    #             self.items_not_matched['play_activity'].append(index)
-    #             continue
-
-    #         #we check if we already saw this track (using title and artist names)
-    #         title_artist = Utility.concat_title_artist(title, artist)
-    #         if title_artist in self.track_instance_dict.keys():
-    #             track_instance = self.track_instance_dict[title_artist]
-    #             self.update_track_instance('play_activity_df', track_instance, index, row, title_artist)
-
-    #         else:
-    #             # if we had no match with title and artist, we look for similarity in the title for the artist
-    #             if artist in self.artist_tracks_titles.keys():
-    #                 titles_comparison_result = self.compare_titles_for_artist(artist, title)
-    #                 if titles_comparison_result == 'No match':
-    #                     #we instantiate the Track object
-    #                     track_instance = Track(self.increment)
-    #                     track_instance.instantiate_track(title, artist)
-    #                     self.update_track_instance('play_activity_df', track_instance, index, row, title_artist)
-    #                     #we update the dictionary that keeps track of our instances, and increment
-    #                     self.track_instance_dict[title_artist] = track_instance
-    #                     self.increment+=1
-
-    #                 else:
-    #                     track_instance = titles_comparison_result
-    #                     if not track_instance.has_title_name(title):
-    #                         track_instance.add_title(title)
-    #                     track_instance.add_appearance({'source': 'play_activity', 'df_index':index})
-    #                     #we also track the match in the track_instances and artist dicts
-    #                     self.track_instance_dict[title_artist] = track_instance
-    #                     self.artist_tracks_titles[artist].append(title)
-
-    #             # else we know we never saw this track because the artist is unknown      
-    #             else:
-    #                 #we update the artist/track names dictionnary
-    #                 self.artist_tracks_titles[artist]=[]
-    #                 self.artist_tracks_titles[artist].append(title)
-
-    #                 #we instantiate the Track object
-    #                 track_instance = Track(self.increment)
-    #                 track_instance.instantiate_track(title, artist)
-    #                 self.update_track_instance('play_activity_df', track_instance, index, row, title_artist)
-
-    #                 #we update the dictionary that keeps track of our instances, and increment
-    #                 self.track_instance_dict[title_artist] = track_instance
-    #                 self.increment+=1
-
-    # def process_likes_dislikes_df(self, likes_dislikes_df):
-    #     '''
-    #         This function goes through each row of the likes_dislikes dataframe, updating
-    #         track instances as they appear.
-    #         This dataframe contains a small proportion of all the tracks ever listened to, and/or in
-    #         the library. As a result, we only want to update existing tracks, and not create new ones.
-    #         The logic works as follows, knowing that we do this for each row of the dataframe:
-    #             - we loop through all the track instances we created so far, and see if any of their 
-    #             identifier matches the id of the row we are looking at
-    #             - if we find a match, we update the track with the rating, appearance, and if we didn't
-    #             already have the associated title, we add it to the list of titles of that track
-    #             - else:
-    #                 - if the track is in the dictionary of track instances, we update the existing
-    #             track's rating and appearance
-    #                 - otherwise, we have two options:
-    #                     - either we know the artist and we can find a similar title in the artist dict,
-    #                 and in this case we update the existing track
-    #                     - or we do not know this artist, or we do not find a close match of title for this
-    #                 artist and in this case we add it to the tracks we could not match and we ignored
-    #     ''' 
-    #     for index, row in likes_dislikes_df.iterrows():
-    #         #we want to look only at rows where the name of the song is available
-    #         if str(row['Title']) != 'nan':
-    #             title = row['Title']
-    #             if str(row['Artist']) != 'nan':
-    #                 artist = row['Artist']
-    #             else:
-    #                 artist = 'No Artist'
-    #         else:
-    #             self.items_not_matched['likes_dislikes'].append(index)
-    #             continue
-
-    #         title_artist = Utility.concat_title_artist(title, artist)
-
-    #         # first we check using the Item Reference as an id
-    #         found_match = False
-    #         for title_name in self.track_instance_dict.keys():
-    #             track_instance = self.track_instance_dict[title_name]
-    #             if row['Item Reference'] in track_instance.apple_music_id:
-    #                 track_instance.add_appearance({'source': 'likes_dislikes', 'df_index':index})
-    #                 track_instance.set_rating(row['Preference'])
-    #                 if not track_instance.has_title_name(row['Title']):
-    #                     track_instance.add_title(row['Title'])
-    #                     self.track_instance_dict[title_artist] = track_instance
-    #                     if row['Title'] not in self.artist_tracks_titles[artist]:
-    #                         self.artist_tracks_titles[artist].append(title)
-    #                 found_match = True
-    #                 break
-
-    #         if found_match is False:
-    #             #we check if we already saw this track (using title and artist names)
-    #             if title_artist in self.track_instance_dict.keys():
-    #                 track_instance = self.track_instance_dict[title_artist]
-    #                 track_instance.add_appearance({'source': 'likes_dislikes', 'df_index':index})
-    #                 track_instance.set_rating(row['Preference'])
-
-    #             else:
-    #                 # if we had no match with title and artist, we look for similarity in the title for the artist
-    #                 if artist in self.artist_tracks_titles.keys():
-    #                     titles_comparison_result = self.compare_titles_for_artist(artist, title)
-    #                     if titles_comparison_result == 'No match':
-    #                         #we add the item to the items_not_matched
-    #                         self.items_not_matched['likes_dislikes'].append(index)
-    #                         #continue
-    #                     else:
-    #                         track_instance = titles_comparison_result
-    #                         if not track_instance.has_title_name(title):
-    #                             track_instance.add_title(title)
-    #                         track_instance.add_appearance({'source': 'likes_dislikes', 'df_index':index})
-    #                         track_instance.set_rating(row['Preference'])
-    #                         self.track_instance_dict[title_artist] = track_instance
-    #                         self.artist_tracks_titles[artist].append(title)
-    #                 else:
-    #                     #we add the item to the items_not_matched,
-    #                     #we choose not to add it to the Track instances as the amount of information is little
-    #                     #and our reference really is the play activity!
-    #                     self.items_not_matched['likes_dislikes'].append(index)
-    #                     continue
-
-
-
-
-
-# self.process_tracks.process_library_tracks_df(self.library_tracks_df)
-#         # we process the identifier infos
-#         self.process_tracks.process_identifier_df(self.identifier_infos_df)
-#         # we process the play activity
-#         self.process_tracks.process_play_df(self.play_activity_df)
-#         # we process the likes dislikes
-#         self.process_tracks.process_likes_dislikes_df(self.likes_dislikes_df)
-
 
 
 if __name__ == '__main__':
