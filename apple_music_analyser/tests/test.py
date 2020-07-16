@@ -596,6 +596,7 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(len(self.process.artist_tracks_titles), 29)
         self.assertEqual(len(self.process.artist_tracks_titles['Céline Dion']), 3)
         self.assertEqual(len(self.process.genres_list), 16)
+        self.assertEqual(self.process.items_not_matched['library_tracks'], [])
         self.process.genres_list = []
         self.process.artist_tracks_titles = {}
         self.process.track_instance_dict = {}
@@ -611,6 +612,7 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(self.process.genres_list, [])
         self.assertEqual(self.process.artist_tracks_titles, {})
         self.assertEqual(self.process.increment, 0)
+        self.assertEqual(len(self.process.items_not_matched['identifier_info']), self.identifier_infos_df.shape[0])
 
     def test_process_play_df(self):
         self.process.process_play_df(self.play_activity_df)
@@ -618,17 +620,19 @@ class TestProcess(unittest.TestCase):
         # because the Genre nan is associated to a row without title it is dropped in the process
         self.assertEqual(len(self.process.genres_list), 25)
         self.assertEqual(len(self.process.track_instance_dict), 110)
+        self.assertEqual(len(self.process.artist_tracks_titles), 89)
         self.assertEqual(self.process.track_instance_dict['The Unforgiven && Metallica'].titles, ['The Unforgiven'])
         self.assertEqual(self.process.track_instance_dict['The Unforgiven && Metallica'].artist, 'Metallica')
         self.assertEqual(self.process.track_instance_dict['The Unforgiven && Metallica'].appearances, [{'source': 'play_activity', 'df_index': 101}, {'source': 'play_activity', 'df_index': 153}, {'source': 'play_activity', 'df_index': 154}])
         self.assertEqual(self.process.track_instance_dict['The Unforgiven && Metallica'].genre, ['Heavy Metal'])
         self.assertEqual(self.process.track_instance_dict['The Unforgiven && Metallica'].identifier, 70)
         self.assertEqual(self.process.track_instance_dict['The Unforgiven && Metallica'].is_in_lib, True)
+        self.assertIn('The Unforgiven', self.process.artist_tracks_titles['Metallica'])
+        # rows with NaN as the title are added to items_not_matched
+        self.assertEqual(self.process.items_not_matched['play_activity'], [0, 1, 2, 3, 96, 116, 165])
         # these info come from other df, so they should remain empty
         self.assertEqual(self.process.track_instance_dict['The Unforgiven && Metallica'].rating, [])
         self.assertEqual(self.process.track_instance_dict['The Unforgiven && Metallica'].apple_music_id, [])
-        self.assertIn('The Unforgiven', self.process.artist_tracks_titles['Metallica'])
-        self.assertEqual(self.process.items_not_matched, {'library_tracks': [], 'identifier_info': [], 'play_activity': [0, 1, 2, 3, 96, 116, 165], 'likes_dislikes': []})
         self.process.genres_list = []
         self.process.artist_tracks_titles = {}
         self.process.track_instance_dict = {}
@@ -637,22 +641,68 @@ class TestProcess(unittest.TestCase):
                      'play_activity':[], 'likes_dislikes':[]}
 
 
-
     def test_process_likes_dislikes_df(self):
-        return None
-
+        # we expect modifications of the process objects only if they are not empty
+        self.process.process_likes_dislikes_df(self.likes_dislikes_df)
+        self.process.process_identifier_df(self.identifier_infos_df)
+        self.assertEqual(self.process.track_instance_dict, {})
+        self.assertEqual(self.process.genres_list, [])
+        self.assertEqual(self.process.artist_tracks_titles, {})
+        self.assertEqual(self.process.increment, 0)
+        self.assertEqual(len(self.process.items_not_matched['likes_dislikes']), self.likes_dislikes_df.shape[0])
 
     def test_process_all_df(self):
         self.process.process_library_tracks_df(self.library_tracks_df)
         self.process.process_identifier_df(self.identifier_infos_df)
         self.process.process_play_df(self.play_activity_df)
         self.process.process_likes_dislikes_df(self.likes_dislikes_df)
-        #self.assertEqual(len(self.process.track_instance_dict), )
-        #self.assertEqual(len(self.process.artist_tracks_titles), )
-        #self.assertEqual(len(self.process.genres_list), )
-        #self.assertEqual(len(self.process.increment), )
-        #self.assertEqual(len(self.process.items_not_matched), )
-        #look at titles, appeareances of a song in particular
+        # in the test df, there are 3 tracks with similar names
+        # and 15 common tracks (among them one is already counted in the 3 similarly named tracks)
+        # so we want to validate that the number of track instances is :
+        # 110 (play_activity tracks) + 35 (library tracks) - 3 - 14 = 128
+        # and that increment is one unit above, so 129
+        self.assertEqual(self.process.increment, 129)
+        # and that we have 132 entries in track_instance_dict (110 (play_activity tracks) + 35 (library tracks) - 14 (common) + 3 (similar names))
+        self.assertEqual(len(self.process.track_instance_dict), 132)
+        # there are 10 songs labeled with the same genre, so output genres_list should have 31 values
+        self.assertEqual(len(self.process.genres_list), 31)
+        #the items not matched of library_tracks_df and play_activity_df should be the same than in the individual test functions defined above
+        self.assertEqual(self.process.items_not_matched['play_activity'], [0, 1, 2, 3, 96, 116, 165])
+        self.assertEqual(self.process.items_not_matched['library_tracks'], [])
+        # but for the other df the values are different!
+        # for likes and dislikes, we expect 7 rows to be unmatched
+        self.assertEqual(self.process.items_not_matched['likes_dislikes'], [3, 4, 5, 10, 19, 20, 21])
+        # for increment actually many more! Total of 51 unmatched, because we use the identifier as a key to match, and not the title
+        self.assertEqual(len(self.process.items_not_matched['identifier_info']), 51)
+        # we expect to find 19 common artists, so the length of artist_tracks_titles should be 29 + 89 - 19 = 99 
+        self.assertEqual(len(self.process.artist_tracks_titles), 99)
+        #and the artist with the more songs should be Michele McLaughlin with 5 tracks
+        max_artist = max(self.process.artist_tracks_titles, key=lambda x:len(self.process.artist_tracks_titles[x]))
+        max_value = len(self.process.artist_tracks_titles[max_artist])
+        self.assertEqual(max_artist, 'Michele McLaughlin')
+        self.assertEqual(max_value, 5)
+
+        #now we focus on one song that appears in multiple df
+        self.assertEqual(self.process.track_instance_dict['Nicolas Le Floch - Générique && Stéphane Moucha'].titles, ['Nicolas Le Floch - Générique', 'Nicolas Le Floch'])
+        self.assertEqual(self.process.track_instance_dict['Nicolas Le Floch - Générique && Stéphane Moucha'].artist, 'Stéphane Moucha')
+        self.assertEqual(self.process.track_instance_dict['Nicolas Le Floch - Générique && Stéphane Moucha'].appearances, [{'source': 'library_tracks', 'df_index': 10}, {'source': 'identifier_info', 'df_index': 14}, {'source': 'play_activity', 'df_index': 72}, {'source': 'likes_dislikes', 'df_index': 28}])
+        self.assertEqual(self.process.track_instance_dict['Nicolas Le Floch - Générique && Stéphane Moucha'].identifier, 9)
+        # we verify that the track is indeed in the library and properly flagged
+        self.assertIn('Nicolas Le Floch - Générique', self.library_tracks_df['Title'].unique())
+        self.assertEqual(self.process.track_instance_dict['Nicolas Le Floch - Générique && Stéphane Moucha'].is_in_lib, True)
+        #we verify that the genre assigned to the track matches in all df available
+        self.assertEqual(self.process.track_instance_dict['Nicolas Le Floch - Générique && Stéphane Moucha'].genre, self.library_tracks_df[self.library_tracks_df['Title']=='Nicolas Le Floch - Générique']['Genre'].values)
+        self.assertEqual(self.process.track_instance_dict['Nicolas Le Floch - Générique && Stéphane Moucha'].genre, self.play_activity_df[self.play_activity_df['Title']=='Nicolas Le Floch - Générique']['Genre'].values)
+        self.assertIn('Nicolas Le Floch - Générique', self.process.artist_tracks_titles['Stéphane Moucha'])
+        #we verify that the rating corresponds to the value in likes_dislikes_df
+        #note that in likes_dislikes_df the song rated is represented by the same track, but a different title!
+        self.assertEqual(self.process.track_instance_dict['Nicolas Le Floch - Générique && Stéphane Moucha'].rating, self.likes_dislikes_df[self.likes_dislikes_df['Title']=='Nicolas Le Floch']['Preference'].values)
+        #we verify that the apple id corresponds to the value in identifier_infos_df
+        self.assertEqual(self.process.track_instance_dict['Nicolas Le Floch - Générique && Stéphane Moucha'].apple_music_id, self.identifier_infos_df[self.identifier_infos_df['Title']=='Nicolas Le Floch - Générique']['Identifier'].values)
+        #let's note here that this value has to be also available in library_tracks_df, as the match from identifier_infos_df are made on the ids and not the titles
+        ids_from_library = [int(x) for x in self.library_tracks_df[self.library_tracks_df['Title']=='Nicolas Le Floch - Générique'][['Apple Music Track Identifier', 'Track Identifier', 'Purchased Track Identifier', 'Tag Matched Track Identifier']].values[0]]
+        self.assertIn(int(self.process.track_instance_dict['Nicolas Le Floch - Générique && Stéphane Moucha'].apple_music_id[0]), ids_from_library)
+        #we reset back the objects of the Process class
         self.process.increment = 0
         self.process.genres_list = []
         self.process.artist_tracks_titles = {}
