@@ -79,7 +79,7 @@ class TestUtils(unittest.TestCase):
 class TestTrack(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
+    def setUp(self):
         self.track = Track('id')
 
     def test_init_track(self):
@@ -107,7 +107,6 @@ class TestTrack(unittest.TestCase):
         self.track.set_artist('New Artist')
         self.assertEqual(self.track.artist, 'New Artist')
 
-
     def test_set_apple_music_id(self):
         self.track.set_apple_music_id(1234567)
         self.assertEqual(self.track.apple_music_id, [1234567])
@@ -117,7 +116,6 @@ class TestTrack(unittest.TestCase):
         self.track.set_library_flag()
         self.assertEqual(self.track.is_in_lib, True)
 
-
     def test_set_genre(self):
         genre = float('NaN')
         self.track.set_genre(genre)
@@ -125,14 +123,12 @@ class TestTrack(unittest.TestCase):
         genre = 'Genre'
         self.track.set_genre(genre)
         self.assertEqual(self.track.genre, ['Genre'])
-        self.track.genre = []
 
 
     def test_add_appearance(self):
         appearance_dict = {'source': 'source', 'df_index':'index'}
         self.track.add_appearance(appearance_dict)
         self.assertEqual(self.track.appearances, [{'source': 'source', 'df_index':'index'}])
-        self.track.appearances = []
 
     def test_set_rating(self):
         rating = 'LOVE'
@@ -147,10 +143,9 @@ class TestTrack(unittest.TestCase):
         rating = 'other rating'
         self.track.set_rating(rating)
         self.assertEqual(self.track.rating, ['LOVE', 'DISLIKE'])
-        self.track.rating = []
 
     @classmethod
-    def tearDownClass(self):
+    def tearDown(self):
         self.track = None
 
 
@@ -307,9 +302,6 @@ class TestQuery(unittest.TestCase):
         self.query_params = None
 
 
-
-
-
 class TestParser(unittest.TestCase):
 
     @classmethod
@@ -349,7 +341,6 @@ class TestParser(unittest.TestCase):
         self.assertTrue(isinstance(result, pd.DataFrame))
         self.assertEqual(result.shape[0], shape_input_df[0])
         self.assertEqual(result.shape[1], shape_input_df[1] - 34)
-        # we reset the df
 
     def test_parse_likes_dislikes_df(self):
         likes_dislikes_df = self.input_df['likes_dislikes_df']
