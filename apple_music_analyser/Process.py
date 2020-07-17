@@ -334,19 +334,19 @@ class TrackSummaryObject():
         self.match_index_instance = {}
 
     def get_track_instance_dict(self):
-        return track_instance_dict
+        return self.track_instance_dict
 
     def get_artist_tracks_titles(self):
-        return artist_tracks_titles
+        return self.artist_tracks_titles
 
     def get_genres_list(self):
-        return genres_list
+        return self.genres_list
 
     def get_items_not_matched(self):
-        return items_not_matched
+        return self.items_not_matched
   
     def get_match_index_instance(self):
-        return match_index_instance
+        return self.match_index_instance
 
     def build_index_track_instance_dict(self, target_df_label):
         '''

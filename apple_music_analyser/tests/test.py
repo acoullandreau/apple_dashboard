@@ -8,7 +8,6 @@ from apple_music_analyser.Query import Query, QueryFactory
 from apple_music_analyser.Parser import Parser
 from apple_music_analyser.Process import ProcessTracks, TrackSummaryObject
 #from apple_music_analyser.VisualizationDataframe import VisualizationDataframe
-#from apple_music_analyser.DataVisualization import SunburstVisualization, RankingListVisualization, HeatMapVisualization, PieChartVisualization, BarChartVisualization
 
 
 class TestUtils(unittest.TestCase):
@@ -679,6 +678,169 @@ class TestProcess(unittest.TestCase):
         self.library_tracks_df = None
         self.library_activity_df = None
         self.track_instance = None
+
+
+
+
+
+class TestProcessTrackSummaryObject(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(self):
+        #we use the test df
+        self.input_df = Utility.get_df_from_archive('test_df.zip')
+        self.parser = Parser(self.input_df)
+        self.likes_dislikes_df = self.parser.likes_dislikes_df
+        self.play_activity_df = self.parser.play_activity_df
+        self.identifier_infos_df = self.parser.identifier_infos_df
+        self.library_tracks_df = self.parser.library_tracks_df
+        self.library_activity_df = self.parser.library_activity_df
+        #we process the df
+        self.process = ProcessTracks()
+        self.process.process_library_tracks_df(self.library_tracks_df)
+        self.process.process_identifier_df(self.identifier_infos_df)
+        self.process.process_play_df(self.play_activity_df)
+        self.process.process_likes_dislikes_df(self.likes_dislikes_df)
+        #we extract the useful objects from the process instance
+        self.track_instance_dict = self.process.track_instance_dict
+        self.artist_tracks_titles = self.process.artist_tracks_titles
+        self.genres_list = self.process.genres_list
+        self.items_not_matched = self.process.items_not_matched
+
+
+    def test_init_TrackSummaryObject(self):
+        result = TrackSummaryObject(self.track_instance_dict, self.artist_tracks_titles, self.genres_list, self.items_not_matched)
+        # we verify that the track_instance_dict of the TrackSummaryObject is the one we passed as an input
+        self.assertEqual(result.track_instance_dict, self.track_instance_dict)
+        #idem for artist_tracks_titles and items_not_matched
+        self.assertEqual(result.artist_tracks_titles, self.artist_tracks_titles)
+        self.assertEqual(result.items_not_matched, self.items_not_matched)
+        # genres_list has only one item to clean up, the nan item
+        self.assertEqual(len(result.genres_list), len(self.genres_list))
+        self.assertIn('', result.genres_list)
+        #we validate that a new object is available for the TrackSummaryObject object
+        self.assertEqual(result.match_index_instance, {})
+
+
+    def test_get_track_instance_dict(self):
+        track_summary_object = TrackSummaryObject(self.track_instance_dict, self.artist_tracks_titles, self.genres_list, self.items_not_matched)
+        result = track_summary_object.get_track_instance_dict()
+        self.assertEqual(result, self.track_instance_dict)
+
+    def test_get_artist_tracks_titles(self):
+        track_summary_object = TrackSummaryObject(self.track_instance_dict, self.artist_tracks_titles, self.genres_list, self.items_not_matched)
+        result = track_summary_object.get_artist_tracks_titles()
+        self.assertEqual(result, self.artist_tracks_titles)
+
+    def test_get_genres_list(self):
+        track_summary_object = TrackSummaryObject(self.track_instance_dict, self.artist_tracks_titles, self.genres_list, self.items_not_matched)
+        result = track_summary_object.get_genres_list()
+        self.assertEqual(len(result), len(self.genres_list))
+        self.assertIn('', result)
+
+    def test_get_items_not_matched(self):
+        track_summary_object = TrackSummaryObject(self.track_instance_dict, self.artist_tracks_titles, self.genres_list, self.items_not_matched)
+        result = track_summary_object.get_items_not_matched()
+        self.assertEqual(result, self.items_not_matched)
+
+    def test_get_match_index_instance(self):
+        track_summary_object = TrackSummaryObject(self.track_instance_dict, self.artist_tracks_titles, self.genres_list, self.items_not_matched)
+        result = track_summary_object.get_match_index_instance()
+        self.assertEqual(result, {})
+
+
+# class TrackSummaryObject():
+
+#     def build_index_track_instance_dict(self, target_df_label):
+#         '''
+#             Returns a dictionary matching the index of the target dataframe with a reference to its
+#             associated Track instance.
+            
+#             Argument can be of four types, for the four df we used to build the Track instances:
+#                 - play_activity
+#                 - library_tracks
+#                 - likes_dislikes
+#                 - identifier_infos
+#         '''
+#         for title_artist in self.track_instance_dict.keys():
+#             instance = self.track_instance_dict[title_artist]
+#             for appearance in instance.appearances:
+#                 if target_df_label in appearance['source']:
+#                     if appearance['df_index'] not in self.match_index_instance:
+#                         self.match_index_instance[appearance['df_index']] = []
+#                     if instance not in self.match_index_instance[appearance['df_index']]:
+#                         self.match_index_instance[appearance['df_index']].append(instance)
+#                         self.match_index_instance[appearance['df_index']].append(instance.is_in_lib)
+#                         self.match_index_instance[appearance['df_index']].append(instance.rating)
+#                         self.match_index_instance[appearance['df_index']].append(instance.genre)
+
+#     @staticmethod
+#     def simplify_genre_list(genres_list):
+#         genres_list_clean = [x if str(x) != 'nan' else '' for x in genres_list]
+#         genres_list_clean = [x.strip() for x in genres_list_clean]
+#         return genres_list_clean
+
+
+#     def build_genres_count_dict(self, genres_serie):
+#         genres_count_dict = {}
+#         for ref_genre in self.genres_list:
+#             genres_count_dict[ref_genre] = 0
+#         for genre_in_serie in genres_serie.tolist():
+#             if '&&' in genre_in_serie:
+#                 genres = genre_in_serie.split('&&')
+#                 for genre in genres:
+#                     if genre.strip() in genres_count_dict.keys():
+#                         genres_count_dict[genre.strip()] += 1
+#             else:
+#                 if genre_in_serie in genres_count_dict.keys():
+#                     genres_count_dict[genre_in_serie] += 1
+#         return genres_count_dict
+
+#     def build_count_dict(self, target_serie):
+#         ref_list = target_serie.unique()
+        
+#         count_dict = {}
+#         for ref_elem in ref_list:
+#             if str(ref_elem) != 'nan':
+#                 count_dict[ref_elem] = 0
+#         for df_elem in target_serie.tolist():
+#             if str(df_elem) != 'nan':
+#                 if df_elem in count_dict.keys():
+#                     count_dict[df_elem] += 1
+#             else:
+#                 continue      
+#         return count_dict
+
+#     def build_ranking_dict_per_year(self, df, ranking_target, query_params):
+#         ranking_dict = {}
+#         for year in query_params['year']:
+#             instance_params = query_params
+#             instance_params['year'] = [year]
+#             query_instance = QueryFactory().create_query(df, instance_params)
+#             filtered_df = query_instance.get_filtered_df()
+#             if ranking_target == 'Genres':
+#                 ranking_dict[year] = self.build_genres_count_dict(filtered_df[ranking_target])
+#             elif ranking_target in ['Artist', 'Track_origin', 'Title']:
+#                 ranking_dict[year] = self.build_count_dict(filtered_df[ranking_target])   
+        
+#         return ranking_dict
+
+
+    @classmethod
+    def tearDownClass(self):
+        self.input_df = None
+        self.parser = None
+        self.likes_dislikes_df = None
+        self.play_activity_df = None
+        self.identifier_infos_df = None
+        self.library_tracks_df = None
+        self.library_activity_df = None
+        self.process = None
+        self.track_instance_dict = None
+        self.artist_tracks_titles = None
+        self.genres_list = None
+        self.items_not_matched = None
+
 
 
 if __name__ == '__main__':
