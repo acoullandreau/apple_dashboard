@@ -18,11 +18,11 @@ df_viz = VisualizationDataframe(input_df)
 
 
 
-print(df_viz.likes_dislikes_df.shape)
-print(df_viz.play_activity_df.shape)
-print(df_viz.identifier_infos_df.shape)
-print(df_viz.library_tracks_df.shape)
-print(df_viz.library_activity_df.shape)
+# print(df_viz.likes_dislikes_df.shape)
+# print(df_viz.play_activity_df.shape)
+# print(df_viz.identifier_infos_df.shape)
+# print(df_viz.library_tracks_df.shape)
+# print(df_viz.library_activity_df.shape)
 
 ###########################################################################################################################
 #extract a df using a query

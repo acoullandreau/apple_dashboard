@@ -168,15 +168,7 @@ class TestQueryFactory(unittest.TestCase):
     def test_query_creator_without_params(self):
         query = self.query_factory.create_query(self.reference_df)
         query_params_default = {
-                'year':self.reference_df['Play_Year'].unique(),
-                'genre':[],
-                'artist':[],
-                'title':[],
-                'rating':[],
-                'origin':[],
-                'offline':None,
-                'library':None,
-                'skipped':None,
+                'year':self.reference_df['Play_Year'].unique()
             }
         self.assertTrue(isinstance(query, Query))
         self.assertEqual(query.reference_df.shape, self.reference_df.shape)
@@ -184,7 +176,14 @@ class TestQueryFactory(unittest.TestCase):
         self.assertEqual(len(query.reference_df['Artist']), 2)
         self.assertEqual(len(query.query_params), len(query_params_default))
         self.assertEqual(len(query.query_params['year']), 2)
-        self.assertEqual(query.query_params['genre'], [])
+        self.assertNotIn('genre', list(query.query_params.keys()))
+        self.assertNotIn('artist', list(query.query_params.keys()))
+        self.assertNotIn('title', list(query.query_params.keys()))
+        self.assertNotIn('rating', list(query.query_params.keys()))
+        self.assertNotIn('origin', list(query.query_params.keys()))
+        self.assertNotIn('offline', list(query.query_params.keys()))
+        self.assertNotIn('library', list(query.query_params.keys()))
+        self.assertNotIn('skipped', list(query.query_params.keys()))
 
     def test_query_creator_with_params(self):
         query_params = {
@@ -792,63 +791,89 @@ class TestProcessTrackSummaryObject(unittest.TestCase):
         self.assertTrue(isinstance(result[0][2], list))
         self.assertTrue(isinstance(result[0][3], list))
 
+    def test_simplify_genre_list(self):
+        genres_list = [float('NaN'), 'Genre_1', 'Genre_2 && Genre_3', ' Genre_4  ']
+        result = self.track_summary_object.simplify_genre_list(genres_list)
+        self.assertEqual(len(result), 4)
+        self.assertEqual(result[0], '')
+        self.assertEqual(result[1], 'Genre_1')
+        self.assertEqual(result[2], 'Genre_2 && Genre_3')
+        self.assertEqual(result[3], 'Genre_4')
+
+    def test_build_genres_count_dict(self):
+        genres_serie = pd.Series(['Rock', 'Pop', 'Soundtrack && Pop'])
+        result = self.track_summary_object.build_genres_count_dict(genres_serie)
+        #we expect the output dictionary to be the same length than the genres_list of TrackSummaryObjects
+        self.assertEqual(len(result), len(self.genres_list))
+        # we expect the count of Rock and Soundtrack to be 1, and of Pop to be 2
+        self.assertEqual(result['Pop'], 2)
+        self.assertEqual(result['Rock'], 1)
+        self.assertEqual(result['Soundtrack'], 1)
+
+    def test_build_count_dict(self):
+        target_serie = pd.Series(['Item_1', 'Item_1', 'Item_2'])
+        result = self.track_summary_object.build_count_dict(target_serie)
+        #we expect the output dictionary to be 2, as there are two distinct items in the target_serie
+        self.assertEqual(len(result), 2)
+        # we expect the count of Rock and Soundtrack to be 1, and of Pop to be 2
+        self.assertEqual(result['Item_1'], 2)
+        self.assertEqual(result['Item_2'], 1)
+
+
+    def test_build_ranking_dict_per_year_per_genre(self):
+        df = pd.DataFrame.from_dict({
+            'Play_Year':[2020, 2020, 2020, 2019],
+            'Genres':['Rock', 'Pop', 'Soundtrack && Pop', 'Rock'],
+            'Artist':['Artist_1', 'Artist_3', 'Artist_1', 'Artist_2']
+            })
+        result = self.track_summary_object.build_ranking_dict_per_year(df, 'Genres')
+        self.assertTrue(isinstance(result, dict))
+        self.assertEqual(len(result), 2)
+        self.assertTrue(isinstance(result[2020], dict))
+        self.assertEqual(len(result[2020]), len(self.genres_list))
+        self.assertEqual(result[2020]['Rock'], 1)
+        self.assertEqual(result[2020]['Pop'], 2)
+        self.assertEqual(result[2020]['Soundtrack'], 1)
+        self.assertTrue(isinstance(result[2019], dict))
+        self.assertEqual(len(result[2019]), len(self.genres_list))
+        self.assertEqual(result[2019]['Rock'], 1)
+        self.assertEqual(result[2019]['Pop'], 0)
+        self.assertEqual(result[2019]['Soundtrack'], 0)
+
+
+    def test_build_ranking_dict_per_year_per_artist(self):
+        df = pd.DataFrame.from_dict({
+            'Play_Year':[2020, 2020, 2020, 2019],
+            'Genres':['Rock', 'Pop', 'Soundtrack && Pop', 'Rock'],
+            'Artist':['Artist_1', 'Artist_3', 'Artist_1', 'Artist_2']
+            })
+        result = self.track_summary_object.build_ranking_dict_per_year(df, 'Artist')
+        self.assertTrue(isinstance(result, dict))
+        self.assertEqual(len(result), 2)
+        self.assertTrue(isinstance(result[2020], dict))
+        self.assertEqual(len(result[2020]), 2)
+        self.assertEqual(result[2020]['Artist_3'], 1)
+        self.assertNotIn('Artist_2', list(result[2020].keys()))
+        self.assertEqual(result[2020]['Artist_1'], 2)
+        self.assertTrue(isinstance(result[2019], dict))
+        self.assertEqual(len(result[2019]), 1)
+        self.assertEqual(result[2019]['Artist_2'], 1)
+        self.assertNotIn('Artist_1', list(result[2019].keys()))
+        self.assertNotIn('Artist_3', list(result[2019].keys()))
+
+
+    def test_build_ranking_dict_per_year_per_other(self):
+        df = pd.DataFrame.from_dict({
+            'Play_Year':[2020, 2020, 2020, 2019],
+            'Genres':['Rock', 'Pop', 'Soundtrack && Pop', 'Rock'],
+            'Artist':['Artist_1', 'Artist_3', 'Artist_1', 'Artist_2']
+            })
+        result = self.track_summary_object.build_ranking_dict_per_year(df, 'Other_Key')
+        self.assertEqual(result, {})
+
     def tearDown(self):
         self.track_summary_object = None
 
-
-
-# class TrackSummaryObject():
-
-#     @staticmethod
-#     def simplify_genre_list(genres_list):
-#         genres_list_clean = [x if str(x) != 'nan' else '' for x in genres_list]
-#         genres_list_clean = [x.strip() for x in genres_list_clean]
-#         return genres_list_clean
-
-
-#     def build_genres_count_dict(self, genres_serie):
-#         genres_count_dict = {}
-#         for ref_genre in self.genres_list:
-#             genres_count_dict[ref_genre] = 0
-#         for genre_in_serie in genres_serie.tolist():
-#             if '&&' in genre_in_serie:
-#                 genres = genre_in_serie.split('&&')
-#                 for genre in genres:
-#                     if genre.strip() in genres_count_dict.keys():
-#                         genres_count_dict[genre.strip()] += 1
-#             else:
-#                 if genre_in_serie in genres_count_dict.keys():
-#                     genres_count_dict[genre_in_serie] += 1
-#         return genres_count_dict
-
-#     def build_count_dict(self, target_serie):
-#         ref_list = target_serie.unique()
-        
-#         count_dict = {}
-#         for ref_elem in ref_list:
-#             if str(ref_elem) != 'nan':
-#                 count_dict[ref_elem] = 0
-#         for df_elem in target_serie.tolist():
-#             if str(df_elem) != 'nan':
-#                 if df_elem in count_dict.keys():
-#                     count_dict[df_elem] += 1
-#             else:
-#                 continue      
-#         return count_dict
-
-#     def build_ranking_dict_per_year(self, df, ranking_target, query_params):
-#         ranking_dict = {}
-#         for year in query_params['year']:
-#             instance_params = query_params
-#             instance_params['year'] = [year]
-#             query_instance = QueryFactory().create_query(df, instance_params)
-#             filtered_df = query_instance.get_filtered_df()
-#             if ranking_target == 'Genres':
-#                 ranking_dict[year] = self.build_genres_count_dict(filtered_df[ranking_target])
-#             elif ranking_target in ['Artist', 'Track_origin', 'Title']:
-#                 ranking_dict[year] = self.build_count_dict(filtered_df[ranking_target])   
-        
-#         return ranking_dict
 
 
     @classmethod
