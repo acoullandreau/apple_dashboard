@@ -686,30 +686,32 @@ class TestProcess(unittest.TestCase):
 class TestProcessTrackSummaryObject(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
+    def setUpClass(cls):
         #we use the test df
-        self.input_df = Utility.get_df_from_archive('test_df.zip')
-        self.parser = Parser(self.input_df)
-        self.likes_dislikes_df = self.parser.likes_dislikes_df
-        self.play_activity_df = self.parser.play_activity_df
-        self.identifier_infos_df = self.parser.identifier_infos_df
-        self.library_tracks_df = self.parser.library_tracks_df
-        self.library_activity_df = self.parser.library_activity_df
+        cls.input_df = Utility.get_df_from_archive('test_df.zip')
+        cls.parser = Parser(cls.input_df)
+        cls.likes_dislikes_df = cls.parser.likes_dislikes_df
+        cls.play_activity_df = cls.parser.play_activity_df
+        cls.identifier_infos_df = cls.parser.identifier_infos_df
+        cls.library_tracks_df = cls.parser.library_tracks_df
+        cls.library_activity_df = cls.parser.library_activity_df
         #we process the df
-        self.process = ProcessTracks()
-        self.process.process_library_tracks_df(self.library_tracks_df)
-        self.process.process_identifier_df(self.identifier_infos_df)
-        self.process.process_play_df(self.play_activity_df)
-        self.process.process_likes_dislikes_df(self.likes_dislikes_df)
+        cls.process = ProcessTracks()
+        cls.process.process_library_tracks_df(cls.library_tracks_df)
+        cls.process.process_identifier_df(cls.identifier_infos_df)
+        cls.process.process_play_df(cls.play_activity_df)
+        cls.process.process_likes_dislikes_df(cls.likes_dislikes_df)
         #we extract the useful objects from the process instance
-        self.track_instance_dict = self.process.track_instance_dict
-        self.artist_tracks_titles = self.process.artist_tracks_titles
-        self.genres_list = self.process.genres_list
-        self.items_not_matched = self.process.items_not_matched
+        cls.track_instance_dict = cls.process.track_instance_dict
+        cls.artist_tracks_titles = cls.process.artist_tracks_titles
+        cls.genres_list = cls.process.genres_list
+        cls.items_not_matched = cls.process.items_not_matched
 
+    def setUp(self):
+        self.track_summary_object = TrackSummaryObject(self.track_instance_dict, self.artist_tracks_titles, self.genres_list, self.items_not_matched)
 
     def test_init_TrackSummaryObject(self):
-        result = TrackSummaryObject(self.track_instance_dict, self.artist_tracks_titles, self.genres_list, self.items_not_matched)
+        result = self.track_summary_object
         # we verify that the track_instance_dict of the TrackSummaryObject is the one we passed as an input
         self.assertEqual(result.track_instance_dict, self.track_instance_dict)
         #idem for artist_tracks_titles and items_not_matched
@@ -721,58 +723,81 @@ class TestProcessTrackSummaryObject(unittest.TestCase):
         #we validate that a new object is available for the TrackSummaryObject object
         self.assertEqual(result.match_index_instance, {})
 
-
     def test_get_track_instance_dict(self):
-        track_summary_object = TrackSummaryObject(self.track_instance_dict, self.artist_tracks_titles, self.genres_list, self.items_not_matched)
-        result = track_summary_object.get_track_instance_dict()
+        result = self.track_summary_object.get_track_instance_dict()
         self.assertEqual(result, self.track_instance_dict)
 
     def test_get_artist_tracks_titles(self):
-        track_summary_object = TrackSummaryObject(self.track_instance_dict, self.artist_tracks_titles, self.genres_list, self.items_not_matched)
-        result = track_summary_object.get_artist_tracks_titles()
+        result = self.track_summary_object.get_artist_tracks_titles()
         self.assertEqual(result, self.artist_tracks_titles)
 
     def test_get_genres_list(self):
-        track_summary_object = TrackSummaryObject(self.track_instance_dict, self.artist_tracks_titles, self.genres_list, self.items_not_matched)
-        result = track_summary_object.get_genres_list()
+        result = self.track_summary_object.get_genres_list()
         self.assertEqual(len(result), len(self.genres_list))
         self.assertIn('', result)
 
     def test_get_items_not_matched(self):
-        track_summary_object = TrackSummaryObject(self.track_instance_dict, self.artist_tracks_titles, self.genres_list, self.items_not_matched)
-        result = track_summary_object.get_items_not_matched()
+        result = self.track_summary_object.get_items_not_matched()
         self.assertEqual(result, self.items_not_matched)
 
     def test_get_match_index_instance(self):
-        track_summary_object = TrackSummaryObject(self.track_instance_dict, self.artist_tracks_titles, self.genres_list, self.items_not_matched)
-        result = track_summary_object.get_match_index_instance()
+        result = self.track_summary_object.get_match_index_instance()
         self.assertEqual(result, {})
+
+    def test_build_index_track_instance_dict_play_activity(self):
+        #we update the match_index_instance
+        self.track_summary_object.build_index_track_instance_dict('play_activity')
+        result = self.track_summary_object.match_index_instance
+        # we have 165 items from play_activity_df, but 7 appear twice (indexes 16, 17, 72, 80, 85, 138 and 155)
+        self.assertEqual(len(result), 158)
+        self.assertTrue(isinstance(result[100], list))
+        self.assertEqual(len(result[100]), 4)
+        self.assertTrue(isinstance(result[100][1], bool))
+        self.assertTrue(isinstance(result[100][2], list))
+        self.assertTrue(isinstance(result[100][3], list))
+
+    def test_build_index_track_instance_dict_library_tracks(self):
+        #we update the match_index_instance
+        self.track_summary_object.build_index_track_instance_dict('library_tracks')
+        result = self.track_summary_object.match_index_instance
+        # we have 39 items from play_activity_df, but 3 appear twice (indexes 4, 5, 10)
+        self.assertEqual(len(result), 36)
+        self.assertTrue(isinstance(result[0], list))
+        self.assertEqual(len(result[0]), 4)
+        self.assertTrue(isinstance(result[0][1], bool))
+        self.assertTrue(isinstance(result[0][2], list))
+        self.assertTrue(isinstance(result[0][3], list))
+
+    def test_build_index_track_instance_dict_identifier_infos(self):
+        #we update the match_index_instance
+        self.track_summary_object.build_index_track_instance_dict('identifier_info')
+        result = self.track_summary_object.match_index_instance
+        # we have 31 items from play_activity_df, but 3 appear twice (indexes 13, 14, 19)
+        self.assertEqual(len(result), 28)
+        self.assertTrue(isinstance(result[20], list))
+        self.assertEqual(len(result[20]), 4)
+        self.assertTrue(isinstance(result[20][1], bool))
+        self.assertTrue(isinstance(result[20][2], list))
+        self.assertTrue(isinstance(result[20][3], list))
+
+    def test_build_index_track_instance_dict_likes_dislikes(self):
+        #we update the match_index_instance
+        self.track_summary_object.build_index_track_instance_dict('likes_dislikes')
+        result = self.track_summary_object.match_index_instance
+        # we have 29 items from play_activity_df, but 2 appear twice (indexes 8, 28)
+        self.assertEqual(len(result), 27)
+        self.assertTrue(isinstance(result[0], list))
+        self.assertEqual(len(result[0]), 4)
+        self.assertTrue(isinstance(result[0][1], bool))
+        self.assertTrue(isinstance(result[0][2], list))
+        self.assertTrue(isinstance(result[0][3], list))
+
+    def tearDown(self):
+        self.track_summary_object = None
+
 
 
 # class TrackSummaryObject():
-
-#     def build_index_track_instance_dict(self, target_df_label):
-#         '''
-#             Returns a dictionary matching the index of the target dataframe with a reference to its
-#             associated Track instance.
-            
-#             Argument can be of four types, for the four df we used to build the Track instances:
-#                 - play_activity
-#                 - library_tracks
-#                 - likes_dislikes
-#                 - identifier_infos
-#         '''
-#         for title_artist in self.track_instance_dict.keys():
-#             instance = self.track_instance_dict[title_artist]
-#             for appearance in instance.appearances:
-#                 if target_df_label in appearance['source']:
-#                     if appearance['df_index'] not in self.match_index_instance:
-#                         self.match_index_instance[appearance['df_index']] = []
-#                     if instance not in self.match_index_instance[appearance['df_index']]:
-#                         self.match_index_instance[appearance['df_index']].append(instance)
-#                         self.match_index_instance[appearance['df_index']].append(instance.is_in_lib)
-#                         self.match_index_instance[appearance['df_index']].append(instance.rating)
-#                         self.match_index_instance[appearance['df_index']].append(instance.genre)
 
 #     @staticmethod
 #     def simplify_genre_list(genres_list):
@@ -827,19 +852,19 @@ class TestProcessTrackSummaryObject(unittest.TestCase):
 
 
     @classmethod
-    def tearDownClass(self):
-        self.input_df = None
-        self.parser = None
-        self.likes_dislikes_df = None
-        self.play_activity_df = None
-        self.identifier_infos_df = None
-        self.library_tracks_df = None
-        self.library_activity_df = None
-        self.process = None
-        self.track_instance_dict = None
-        self.artist_tracks_titles = None
-        self.genres_list = None
-        self.items_not_matched = None
+    def tearDownClass(cls):
+        cls.input_df = None
+        cls.parser = None
+        cls.likes_dislikes_df = None
+        cls.play_activity_df = None
+        cls.identifier_infos_df = None
+        cls.library_tracks_df = None
+        cls.library_activity_df = None
+        cls.process = None
+        cls.track_instance_dict = None
+        cls.artist_tracks_titles = None
+        cls.genres_list = None
+        cls.items_not_matched = None
 
 
 

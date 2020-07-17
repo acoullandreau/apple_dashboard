@@ -357,7 +357,7 @@ class TrackSummaryObject():
                 - play_activity
                 - library_tracks
                 - likes_dislikes
-                - identifier_infos
+                - identifier_info
         '''
         for title_artist in self.track_instance_dict.keys():
             instance = self.track_instance_dict[title_artist]
