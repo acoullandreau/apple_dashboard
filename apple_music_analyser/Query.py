@@ -3,17 +3,30 @@
 class QueryFactory():
 
     def create_query(self, reference_df, params_dict=None):
+        '''
+            This function is meant to create a Query instance with a parameters dict.
+            If no dictionary is provided, basically the query returned is going to filter
+            the df on the unique values of Play_Year it has -> simply put, it will return the whole df
+            unfiltered.
+            This option is kept to be able to have another default parameter, for example excluding always
+            a particular year, or value. 
+            The params_dict must have a structure like the following (if some values are empty, it is
+            not necessary to have the key, see query_params_default for example):
+                params_dict = {
+                    'year':list,
+                    'genre':list,
+                    'artist':list,
+                    'title':list,
+                    'rating':list,
+                    'origin':list,
+                    'offline':bool,
+                    'library':bool,
+                    'skipped':bool,
+                }
+        '''
         if params_dict == None:
             query_params_default = {
                 'year':reference_df['Play_Year'].unique(),
-                'genre':[],
-                'artist':[],
-                'title':[],
-                'rating':[],
-                'origin':[],
-                'offline':None,
-                'library':None,
-                'skipped':None,
             }
             return Query(reference_df, query_params_default)
 
