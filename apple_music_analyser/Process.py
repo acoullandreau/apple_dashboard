@@ -408,9 +408,15 @@ class TrackSummaryObject():
                 continue      
         return count_dict
 
-    def build_ranking_dict_per_year(self, df, ranking_target, query_params):
+    def build_ranking_dict_per_year(self, df, ranking_target, query_params=None):
         ranking_dict = {}
-        for year in query_params['year']:
+        if query_params == None:
+            query_params = {
+                'year':df['Play_Year'].unique(),
+            }
+        
+        years = query_params['year']
+        for year in years:
             instance_params = query_params
             instance_params['year'] = [year]
             query_instance = QueryFactory().create_query(df, instance_params)
