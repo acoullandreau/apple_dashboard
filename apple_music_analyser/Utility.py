@@ -44,7 +44,6 @@ class Utility():
                 dataframes['likes_dislikes_df']=likes_dislikes_df
 
                 play_activity_df = Utility.get_df_from_file(archive_files.open(target_files['play_activity_path']))
-                #play_activity_df = []
                 dataframes['play_activity_df']=play_activity_df
 
                 archive_files.close()
@@ -66,8 +65,7 @@ class Utility():
         elif file_path.name.endswith('.json'):
             df = pd.read_json(file_path)
         elif file_path.name.endswith('.csv'):
-            #df = pd.read_csv(file_path, error_bad_lines=False, warn_bad_lines=False)
-            df = pd.read_csv(file_path, error_bad_lines=False)
+            df = pd.read_csv(file_path, error_bad_lines=False, warn_bad_lines=False)
         else:
             print('Please provide a file with extension .csv, .json or .json.zip')
         

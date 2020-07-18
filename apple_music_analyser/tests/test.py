@@ -1,13 +1,13 @@
 import pandas as pd
 import unittest
-from unittest.mock import MagicMock
+#from unittest.mock import MagicMock
 
 from apple_music_analyser.Utility import Utility
 from apple_music_analyser.Track import Track
 from apple_music_analyser.Query import Query, QueryFactory
 from apple_music_analyser.Parser import Parser
 from apple_music_analyser.Process import ProcessTracks, TrackSummaryObject
-#from apple_music_analyser.VisualizationDataframe import VisualizationDataframe
+from apple_music_analyser.VisualizationDataframe import VisualizationDataframe
 
 
 class TestUtils(unittest.TestCase):
@@ -433,6 +433,7 @@ class TestParser(unittest.TestCase):
         self.assertTrue(isinstance(result, pd.DataFrame))
         #we expect 1 row with date before 2015 to be dropped
         self.assertEqual(result.shape[0], shape_input_df[0] -1)
+        # 24 columns are dropped, and 10 added (those tested below)
         self.assertEqual(result.shape[1], shape_input_df[1] -14)
         self.assertIn('Play date time', result.columns)
         self.assertIn('Play Year', result.columns)
@@ -861,7 +862,6 @@ class TestProcessTrackSummaryObject(unittest.TestCase):
         self.assertNotIn('Artist_1', list(result[2019].keys()))
         self.assertNotIn('Artist_3', list(result[2019].keys()))
 
-
     def test_build_ranking_dict_per_year_per_other(self):
         df = pd.DataFrame.from_dict({
             'Play_Year':[2020, 2020, 2020, 2019],
@@ -873,8 +873,6 @@ class TestProcessTrackSummaryObject(unittest.TestCase):
 
     def tearDown(self):
         self.track_summary_object = None
-
-
 
     @classmethod
     def tearDownClass(cls):
@@ -890,6 +888,148 @@ class TestProcessTrackSummaryObject(unittest.TestCase):
         cls.artist_tracks_titles = None
         cls.genres_list = None
         cls.items_not_matched = None
+
+
+
+class TestVisualizationDataframe(unittest.TestCase):
+
+    def setUp(self):
+        self.input_df = Utility.get_df_from_archive('test_df.zip')
+        self.df_visualization = VisualizationDataframe(self.input_df)
+
+    def test_init_VisualizationDataframe(self):
+        result = self.df_visualization
+        self.assertTrue(isinstance(result.parser, Parser))
+        self.assertTrue(isinstance(result.process_tracks, ProcessTracks))
+        self.assertTrue(isinstance(result.track_summary_objects, TrackSummaryObject))
+        self.assertTrue(isinstance(result.likes_dislikes_df, pd.DataFrame))
+        self.assertTrue(isinstance(result.play_activity_df, pd.DataFrame))
+        self.assertTrue(isinstance(result.identifier_infos_df, pd.DataFrame))
+        self.assertTrue(isinstance(result.library_tracks_df, pd.DataFrame))
+        self.assertTrue(isinstance(result.library_activity_df, pd.DataFrame))
+        self.assertTrue(isinstance(result.df_visualization, pd.DataFrame))
+        self.assertTrue(isinstance(result.source_dataframes, dict))
+        # df_vizualisation must have as many lines as the play_activity_df we defined -> 165 rows
+        self.assertEqual(result.df_visualization.shape[0], 165)
+        # df_vizualisation must have 20 columns,
+        # initial df has 31, after parsing it we removed 14 columns, and to build df_vizualisation we added 3
+        self.assertEqual(result.df_visualization.shape[1], 20)
+        self.assertIn('Genres', result.df_visualization.columns)
+        self.assertNotIn('Genre', result.df_visualization.columns)
+        self.assertIn('Rating', result.df_visualization.columns)
+        self.assertIn('Track_Instance', result.df_visualization.columns)
+
+    def test_get_df_viz(self):
+        result = self.df_visualization.get_df_viz()
+        # we test exactly like in the previous test
+        self.assertTrue(isinstance(result, pd.DataFrame))
+        self.assertEqual(result.shape[0], 165)
+        self.assertEqual(result.shape[1], 20)
+        self.assertIn('Genres', result.columns)
+        self.assertNotIn('Genre', result.columns)
+        self.assertIn('Rating', result.columns)
+        self.assertIn('Track_Instance', result.columns)
+
+    def test_get_source_dataframes(self):
+        result = self.df_visualization.get_source_dataframes()
+        self.assertTrue(isinstance(result, dict))
+        self.assertEqual(len(result), 5)
+        self.assertEqual(list(result.keys()), ['likes_dislikes_df', 'play_activity_df', 'identifier_infos_df', 'library_tracks_df', 'library_activity_df'])
+        for i in range(len(list(result.values()))):
+            self.assertTrue(isinstance(list(result.values())[i], pd.DataFrame))
+
+    def test_get_play_activity_df(self):
+        shape_before_parse = self.input_df['play_activity_df'].shape
+        result = self.df_visualization.get_play_activity_df()
+        self.assertTrue(isinstance(result, pd.DataFrame))
+        #we expect 1 row with date before 2015 to be dropped
+        self.assertEqual(result.shape[0], shape_before_parse[0] -1)
+        # when parsing 24 columns are dropped from the input and 10 added
+        self.assertEqual(result.shape[1], shape_before_parse[1] - 14)
+
+    def test_get_identifier_info_df(self):
+        shape_before_parse = self.input_df['identifier_infos_df'].shape
+        result = self.df_visualization.get_identifier_info_df()
+        self.assertTrue(isinstance(result, pd.DataFrame))
+        # no parsing occured, so no changes in the shape of the df
+        self.assertEqual(result.shape[0], shape_before_parse[0])
+        self.assertEqual(result.shape[1], shape_before_parse[1])
+
+    def test_get_library_tracks_df(self):
+        shape_before_parse = self.input_df['library_tracks_df'].shape
+        result = self.df_visualization.get_library_tracks_df()
+        self.assertTrue(isinstance(result, pd.DataFrame))
+        # no row was removed
+        self.assertEqual(result.shape[0], shape_before_parse[0])
+        # after parsing, 34 columns are removed
+        self.assertEqual(result.shape[1], shape_before_parse[1] - 34)
+
+    def test_get_library_activity_df(self):
+        shape_before_parse = self.input_df['library_activity_df'].shape
+        result = self.df_visualization.get_library_activity_df()
+        self.assertTrue(isinstance(result, pd.DataFrame))
+        # no row was removed
+        self.assertEqual(result.shape[0], shape_before_parse[0])
+        # after parsing, 8 columns are added
+        self.assertEqual(result.shape[1], shape_before_parse[1] + 8)
+    
+    def test_get_likes_dislikes_df(self):
+        shape_before_parse = self.input_df['likes_dislikes_df'].shape
+        result = self.df_visualization.get_likes_dislikes_df()
+        self.assertTrue(isinstance(result, pd.DataFrame))
+        # no row was removed
+        self.assertEqual(result.shape[0], shape_before_parse[0])
+        # after parsing, 2 columns are added
+        self.assertEqual(result.shape[1], shape_before_parse[1]  + 2 )
+
+    def test_get_df_from_source(self):
+        return None
+
+    def test_process_tracks_in_df(self):
+        return None
+
+    def test_build_df_visualisation(self):
+        return None
+
+
+
+#     def get_library_activity_df(self):
+#         return self.library_activity_df
+
+#     def get_likes_dislikes_df(self):
+#         return self.likes_dislikes_df
+
+#     def get_df_from_source(self):
+#         if self.source_dataframes != {}:
+#             self.likes_dislikes_df = self.parser.likes_dislikes_df
+#             self.play_activity_df = self.parser.play_activity_df
+#             self.identifier_infos_df = self.parser.identifier_infos_df
+#             self.library_tracks_df = self.parser.library_tracks_df
+#             self.library_activity_df = self.parser.library_activity_df
+
+#     def process_tracks_in_df(self):
+#         # we process the library tracks
+#         self.process_tracks.process_library_tracks_df(self.library_tracks_df)
+#         # # we process the identifier infos
+#         self.process_tracks.process_identifier_df(self.identifier_infos_df)
+#         # # we process the play activity
+#         self.process_tracks.process_play_df(self.play_activity_df)
+#         # # we process the likes dislikes
+#         self.process_tracks.process_likes_dislikes_df(self.likes_dislikes_df)
+
+#     def build_df_visualisation(self, target_df):
+#         self.track_summary_objects.build_index_track_instance_dict(target_df)
+#         match_index_instance_activity = self.track_summary_objects.match_index_instance
+#         index_instance_df = pd.DataFrame.from_dict(match_index_instance_activity, orient='index', columns=['Track Instance', 'Library Track', 'Rating', 'Genres'])
+#         df_visualization = self.play_activity_df.drop(['Genre'], axis=1)
+#         df_visualization = pd.concat([df_visualization,index_instance_df], axis=1)
+#         df_visualization['Rating'] = df_visualization['Rating'].apply(Utility.clean_col_with_list)
+#         df_visualization['Genres'] = df_visualization['Genres'].apply(Utility.clean_col_with_list)
+#         df_visualization['Library Track'].fillna(False, inplace=True)
+#         df_visualization.columns = [c.replace(' ', '_') for c in df_visualization.columns]
+#         return df_visualization
+
+
 
 
 

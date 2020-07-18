@@ -49,17 +49,18 @@ class Parser():
 
     @staticmethod
     def parse_library_activity_df(library_activity_df):
+        parsed_df = library_activity_df.copy()
         # parse time related column
-        parsed_datetime_series = Utility.parse_date_time_column(library_activity_df, 'Transaction Date')
-        Utility.add_time_related_columns(library_activity_df, parsed_datetime_series, col_name_prefix='Transaction ')
+        parsed_datetime_series = Utility.parse_date_time_column(parsed_df, 'Transaction Date')
+        Utility.add_time_related_columns(parsed_df, parsed_datetime_series, col_name_prefix='Transaction ')
     
         # parse action agent column
-        library_activity_df['Transaction Agent'] = library_activity_df['UserAgent'].str.split('/').str.get(0)
-        library_activity_df.replace({'Transaction Agent' : { 'itunescloudd' : 'iPhone', 'iTunes' : 'Macintosh'}}, inplace=True)
-        library_activity_df['Transaction Agent Model'] = library_activity_df[library_activity_df['Transaction Agent'] == 'iPhone']['UserAgent'].str.split('/').str.get(3).str.split(',').str.get(0)
-        library_activity_df.loc[library_activity_df['Transaction Agent'].eq('Macintosh'), 'Transaction Agent Model'] = 'Macintosh'
+        parsed_df['Transaction Agent'] = parsed_df['UserAgent'].str.split('/').str.get(0)
+        parsed_df.replace({'Transaction Agent' : { 'itunescloudd' : 'iPhone', 'iTunes' : 'Macintosh'}}, inplace=True)
+        parsed_df['Transaction Agent Model'] = parsed_df[parsed_df['Transaction Agent'] == 'iPhone']['UserAgent'].str.split('/').str.get(3).str.split(',').str.get(0)
+        parsed_df.loc[parsed_df['Transaction Agent'].eq('Macintosh'), 'Transaction Agent Model'] = 'Macintosh'
 
-        return library_activity_df
+        return parsed_df
 
     @staticmethod
     def parse_play_activity_df(play_activity_df, convert_to_local_time = True, drop_columns=True):
@@ -72,43 +73,44 @@ class Parser():
         'UTC Offset In Seconds','Play Duration Milliseconds', 'Media Duration In Milliseconds', 'Feature Name'
         ]
         # Rename columns for merges later
-        play_activity_df.rename(columns={'Content Name':'Title', 'Artist Name':'Artist'}, inplace=True)
+        parsed_df = play_activity_df.copy()
+        parsed_df.rename(columns={'Content Name':'Title', 'Artist Name':'Artist'}, inplace=True)
         
         # Add time related columns
-        play_activity_df['Activity date time'] = pd.to_datetime(play_activity_df['Event Start Timestamp'])
-        play_activity_df['Activity date time'].fillna(pd.to_datetime(play_activity_df['Event End Timestamp']), inplace=True)
+        parsed_df['Activity date time'] = pd.to_datetime(parsed_df['Event Start Timestamp'])
+        parsed_df['Activity date time'].fillna(pd.to_datetime(parsed_df['Event End Timestamp']), inplace=True)
         if convert_to_local_time is True:
-            play_activity_df['Activity date time'] = Utility.convert_to_local_time(play_activity_df['Activity date time'], play_activity_df['UTC Offset In Seconds'])
-        parsed_datetime_series = Utility.parse_date_time_column(play_activity_df, 'Activity date time')
-        Utility.add_time_related_columns(play_activity_df, parsed_datetime_series, col_name_prefix='Play ')
+            parsed_df['Activity date time'] = Utility.convert_to_local_time(parsed_df['Activity date time'], parsed_df['UTC Offset In Seconds'])
+        parsed_datetime_series = Utility.parse_date_time_column(parsed_df, 'Activity date time')
+        Utility.add_time_related_columns(parsed_df, parsed_datetime_series, col_name_prefix='Play ')
 
         # We remove year outliers (Apple Music started in 2015, whatever is reported before is a mistake)
-        play_activity_df = play_activity_df.drop(play_activity_df[play_activity_df['Play Year']< 2015].index)
+        parsed_df = parsed_df.drop(parsed_df[parsed_df['Play Year']< 2015].index)
 
         # Add partial listening column 
-        play_duration = play_activity_df['Play Duration Milliseconds']
-        media_duration = play_activity_df['Media Duration In Milliseconds']
-        Parser.set_partial_listening(play_activity_df, play_activity_df['End Reason Type'], play_duration, media_duration)
+        play_duration = parsed_df['Play Duration Milliseconds']
+        media_duration = parsed_df['Media Duration In Milliseconds']
+        Parser.set_partial_listening(parsed_df, parsed_df['End Reason Type'], play_duration, media_duration)
 
         # Add track origin column
-        play_activity_df['Track origin'] = play_activity_df['Feature Name'].apply(Parser.get_track_origin)
+        parsed_df['Track origin'] = parsed_df['Feature Name'].apply(Parser.get_track_origin)
 
         # Add play duration column
-        activity_start = pd.to_datetime(play_activity_df['Event Start Timestamp'])
-        activity_end = pd.to_datetime(play_activity_df['Event End Timestamp'])
-        played_completely = play_activity_df['Played completely']
-        Parser.compute_play_duration(play_activity_df, activity_start, activity_end, played_completely, play_duration, media_duration)
+        activity_start = pd.to_datetime(parsed_df['Event Start Timestamp'])
+        activity_end = pd.to_datetime(parsed_df['Event End Timestamp'])
+        played_completely = parsed_df['Played completely']
+        Parser.compute_play_duration(parsed_df, activity_start, activity_end, played_completely, play_duration, media_duration)
 
         # we remove outliers from this play duration column, saying that if a value if above the 99th percentile,
         # we drop it, and replace it by the duration of the media
-        percentile = play_activity_df['Play duration in minutes'].quantile(0.99)
-        Parser.remove_play_duration_outliers(play_activity_df, play_activity_df['Play duration in minutes'], media_duration, percentile)
+        percentile = parsed_df['Play duration in minutes'].quantile(0.99)
+        Parser.remove_play_duration_outliers(parsed_df, parsed_df['Play duration in minutes'], media_duration, percentile)
 
         #we can then remove the columns we do not need anymore!
         if drop_columns:
-            play_activity_df = play_activity_df.drop(columns_to_drop, axis=1, errors='ignore')
+            parsed_df = parsed_df.drop(columns_to_drop, axis=1, errors='ignore')
 
-        return play_activity_df
+        return parsed_df
 
     @staticmethod
     def parse_library_tracks_infos_df(library_tracks_infos_df):
@@ -124,14 +126,16 @@ class Parser():
         'Movement Name', 'Movement Number', 'Movement Count',
         'Display Work Name', 'Copyright', 'Playlist Only Track',
         'Sort Album Artist', 'Sort Composer']
-        library_tracks_df = library_tracks_infos_df.drop(columns_to_drop, axis=1, errors='ignore')
-        return library_tracks_df
+        parsed_df = library_tracks_infos_df.copy()
+        parsed_df = parsed_df.drop(columns_to_drop, axis=1, errors='ignore')
+        return parsed_df
 
     @staticmethod
     def parse_likes_dislikes_df(likes_dislikes_df):
-        likes_dislikes_df['Title'] = likes_dislikes_df['Item Description'].str.split(' -').str.get(1).str.strip()
-        likes_dislikes_df['Artist'] = likes_dislikes_df['Item Description'].str.split(' - ').str.get(0).str.strip()
-        return likes_dislikes_df
+        parsed_df = likes_dislikes_df.copy()
+        parsed_df['Title'] = parsed_df['Item Description'].str.split(' -').str.get(1).str.strip()
+        parsed_df['Artist'] = parsed_df['Item Description'].str.split(' - ').str.get(0).str.strip()
+        return parsed_df
 
     @staticmethod
     def set_partial_listening(play_activity_df, end_reason_type, play_duration, media_duration):
