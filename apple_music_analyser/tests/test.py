@@ -910,10 +910,9 @@ class TestVisualizationDataframe(unittest.TestCase):
         self.assertTrue(isinstance(result.df_visualization, pd.DataFrame))
         self.assertTrue(isinstance(result.source_dataframes, dict))
         # df_vizualisation must have as many lines as the play_activity_df we defined -> 165 rows
-        self.assertEqual(result.df_visualization.shape[0], 165)
-        # df_vizualisation must have 20 columns,
-        # initial df has 31, after parsing it we removed 14 columns, and to build df_vizualisation we added 3
-        self.assertEqual(result.df_visualization.shape[1], 20)
+        self.assertEqual(result.df_visualization.shape[0], self.df_visualization.play_activity_df.shape[0])
+        # df_vizualisation must have 3 columns more than play_activity_df -> 20 columns
+        self.assertEqual(result.df_visualization.shape[1], self.df_visualization.play_activity_df.shape[1] + 3)
         self.assertIn('Genres', result.df_visualization.columns)
         self.assertNotIn('Genre', result.df_visualization.columns)
         self.assertIn('Rating', result.df_visualization.columns)
@@ -987,42 +986,20 @@ class TestVisualizationDataframe(unittest.TestCase):
         self.assertRaises(Exception, self.df_visualization.get_df_from_source)
 
     def test_process_tracks_in_df_no_source(self):
-        return None
+        self.df_visualization.source_dataframes = {}
+        self.assertRaises(Exception, self.df_visualization.process_tracks_in_df)
 
-    def test_build_df_visualisation(self):
-        return None
-
-
-#     def get_df_from_source(self):
-#         if self.source_dataframes != {}:
-#             self.likes_dislikes_df = self.parser.likes_dislikes_df
-#             self.play_activity_df = self.parser.play_activity_df
-#             self.identifier_infos_df = self.parser.identifier_infos_df
-#             self.library_tracks_df = self.parser.library_tracks_df
-#             self.library_activity_df = self.parser.library_activity_df
-
-#     def process_tracks_in_df(self):
-#         # we process the library tracks
-#         self.process_tracks.process_library_tracks_df(self.library_tracks_df)
-#         # # we process the identifier infos
-#         self.process_tracks.process_identifier_df(self.identifier_infos_df)
-#         # # we process the play activity
-#         self.process_tracks.process_play_df(self.play_activity_df)
-#         # # we process the likes dislikes
-#         self.process_tracks.process_likes_dislikes_df(self.likes_dislikes_df)
-
-#     def build_df_visualisation(self, target_df):
-#         self.track_summary_objects.build_index_track_instance_dict(target_df)
-#         match_index_instance_activity = self.track_summary_objects.match_index_instance
-#         index_instance_df = pd.DataFrame.from_dict(match_index_instance_activity, orient='index', columns=['Track Instance', 'Library Track', 'Rating', 'Genres'])
-#         df_visualization = self.play_activity_df.drop(['Genre'], axis=1)
-#         df_visualization = pd.concat([df_visualization,index_instance_df], axis=1)
-#         df_visualization['Rating'] = df_visualization['Rating'].apply(Utility.clean_col_with_list)
-#         df_visualization['Genres'] = df_visualization['Genres'].apply(Utility.clean_col_with_list)
-#         df_visualization['Library Track'].fillna(False, inplace=True)
-#         df_visualization.columns = [c.replace(' ', '_') for c in df_visualization.columns]
-#         return df_visualization
-
+    def test_build_df_visualisation_play_activity(self):
+        result = self.df_visualization.build_df_visualisation()
+        self.assertEqual(result.shape[0], self.df_visualization.play_activity_df.shape[0])
+        self.assertEqual(result.shape[1], self.df_visualization.play_activity_df.shape[1] + 3)
+        self.assertIn('Genres', result.columns)
+        self.assertNotIn('Genre', result.columns)
+        self.assertIn('Rating', result.columns)
+        self.assertIn('Track_Instance', result.columns)
+        # all spaces in column names have been replaces by '_'
+        for column_name in result.columns:
+            self.assertNotIn(' ', column_name)
 
 
 

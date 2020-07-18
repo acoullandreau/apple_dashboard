@@ -20,7 +20,7 @@ class VisualizationDataframe():
         self.process_tracks = ProcessTracks()
         self.process_tracks_in_df()
         self.track_summary_objects = TrackSummaryObject(self.process_tracks.track_instance_dict, self.process_tracks.artist_tracks_titles, self.process_tracks.genres_list, self.process_tracks.items_not_matched)
-        self.df_visualization = self.build_df_visualisation('play_activity')
+        self.df_visualization = self.build_df_visualisation()
 
     def get_df_viz(self):
         return self.df_visualization
@@ -66,8 +66,8 @@ class VisualizationDataframe():
         else:
             raise Exception('No source dataframe provided.')
 
-    def build_df_visualisation(self, target_df):
-        self.track_summary_objects.build_index_track_instance_dict(target_df)
+    def build_df_visualisation(self):
+        self.track_summary_objects.build_index_track_instance_dict('play_activity')
         match_index_instance_activity = self.track_summary_objects.match_index_instance
         index_instance_df = pd.DataFrame.from_dict(match_index_instance_activity, orient='index', columns=['Track Instance', 'Library Track', 'Rating', 'Genres'])
         df_visualization = self.play_activity_df.drop(['Genre'], axis=1, errors='ignore')
