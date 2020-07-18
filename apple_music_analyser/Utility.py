@@ -19,15 +19,6 @@ class Utility():
                 'play_activity_path': '{0}/Apple Music Activity/Apple Music Play Activity.csv'.format(input_folder_name)
             }
 
-            # target_files = {
-            #     'identifier_infos_path' : 'Apple_Media_Services/Apple Music Activity/Identifier Information.json.zip',
-            #     'library_tracks_path' : 'Apple_Media_Services/Apple Music Activity/Apple Music Library Tracks.json.zip',
-            #     'library_activity_path': 'Apple_Media_Services/Apple Music Activity/Apple Music Library Activity.json.zip',
-            #     'likes_dislikes_path' : 'Apple_Media_Services/Apple Music Activity/Apple Music Likes and Dislikes.csv',
-            #     'play_activity_path': 'Apple_Media_Services/Apple Music Activity/Apple Music Play Activity.csv'
-            # }
-
-
             dataframes = {}
 
             if archive_files.testzip() == None:
@@ -49,11 +40,11 @@ class Utility():
                 archive_files.close()
 
             else:
-                print('Please verify that you are passing a valid zip file')
+                print('WARNING: Please refer to the documentation to see what files are expected in the zip provided. Returned object is empty.')
 
             return dataframes
         else:
-            print('Please verify that you are passing a valid zip file')
+            print('WARNING: Please refer to the documentation to see what files are expected in the zip provided. Returned object is empty.')
             return {}
 
     @staticmethod

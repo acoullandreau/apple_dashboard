@@ -50,22 +50,27 @@ class VisualizationDataframe():
             self.identifier_infos_df = self.parser.identifier_infos_df
             self.library_tracks_df = self.parser.library_tracks_df
             self.library_activity_df = self.parser.library_activity_df
+        else:
+            raise Exception('No source dataframe provided.')
 
     def process_tracks_in_df(self):
-        # we process the library tracks
-        self.process_tracks.process_library_tracks_df(self.library_tracks_df)
-        # # we process the identifier infos
-        self.process_tracks.process_identifier_df(self.identifier_infos_df)
-        # # we process the play activity
-        self.process_tracks.process_play_df(self.play_activity_df)
-        # # we process the likes dislikes
-        self.process_tracks.process_likes_dislikes_df(self.likes_dislikes_df)
+        if self.source_dataframes != {}:
+            # we process the library tracks
+            self.process_tracks.process_library_tracks_df(self.library_tracks_df)
+            # # we process the identifier infos
+            self.process_tracks.process_identifier_df(self.identifier_infos_df)
+            # # we process the play activity
+            self.process_tracks.process_play_df(self.play_activity_df)
+            # # we process the likes dislikes
+            self.process_tracks.process_likes_dislikes_df(self.likes_dislikes_df)
+        else:
+            raise Exception('No source dataframe provided.')
 
     def build_df_visualisation(self, target_df):
         self.track_summary_objects.build_index_track_instance_dict(target_df)
         match_index_instance_activity = self.track_summary_objects.match_index_instance
         index_instance_df = pd.DataFrame.from_dict(match_index_instance_activity, orient='index', columns=['Track Instance', 'Library Track', 'Rating', 'Genres'])
-        df_visualization = self.play_activity_df.drop(['Genre'], axis=1)
+        df_visualization = self.play_activity_df.drop(['Genre'], axis=1, errors='ignore')
         df_visualization = pd.concat([df_visualization,index_instance_df], axis=1)
         df_visualization['Rating'] = df_visualization['Rating'].apply(Utility.clean_col_with_list)
         df_visualization['Genres'] = df_visualization['Genres'].apply(Utility.clean_col_with_list)

@@ -982,22 +982,16 @@ class TestVisualizationDataframe(unittest.TestCase):
         # after parsing, 2 columns are added
         self.assertEqual(result.shape[1], shape_before_parse[1]  + 2 )
 
-    def test_get_df_from_source(self):
-        return None
+    def test_get_df_from_source_no_source(self):
+        self.df_visualization.source_dataframes = {}
+        self.assertRaises(Exception, self.df_visualization.get_df_from_source)
 
-    def test_process_tracks_in_df(self):
+    def test_process_tracks_in_df_no_source(self):
         return None
 
     def test_build_df_visualisation(self):
         return None
 
-
-
-#     def get_library_activity_df(self):
-#         return self.library_activity_df
-
-#     def get_likes_dislikes_df(self):
-#         return self.likes_dislikes_df
 
 #     def get_df_from_source(self):
 #         if self.source_dataframes != {}:

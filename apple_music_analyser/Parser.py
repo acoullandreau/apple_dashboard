@@ -17,11 +17,11 @@ class Parser():
         '{  "identifier_infos_df" : identifier_infos_df, "library_tracks_df" : library_tracks_df,\n'
         '"library_activity_df" : library_activity_df, "likes_dislikes_df" : likes_dislikes_df, "play_activity_df" : play_activity_df    }\n'
 
-        '...And that the values in this dictionary are pandas dataframes.')
+        '...And that the values in this dictionary are pandas dataframes. Returned object is empty.')
 
         dataframes = {}
         if len(source_files) != 5:
-            print(error_message_bad_input)
+            print('WARNING:\n {0}'.format(error_message_bad_input))
 
         else:
             if Utility.validate_input_df_files(source_files):
@@ -31,7 +31,7 @@ class Parser():
                 dataframes['library_tracks_df'] = source_files['library_tracks_df']
                 dataframes['library_activity_df'] = source_files['library_activity_df']
             else:
-                print(error_message_bad_input)
+                print('WARNING:\n {0}'.format(error_message_bad_input))
         
         return dataframes
 
@@ -44,7 +44,8 @@ class Parser():
             self.library_tracks_df = self.parse_library_tracks_infos_df(self.source_dataframes['library_tracks_df'])
             self.library_activity_df = self.parse_library_activity_df(self.source_dataframes['library_activity_df'])
         else:
-            print('No source dataframes found in input.')
+            print('No source dataframes found in input. Script is interrupted')
+            exit()
 
 
     @staticmethod
