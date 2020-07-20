@@ -7,6 +7,40 @@ from apple_music_analyser.Process import ProcessTracks, TrackSummaryObject
 
 class VisualizationDataframe():
 
+    '''
+        This class is responsible for generating a dataframe that can be used for analysis
+        and visualizations. This dataframe is obtained after parsing, processing and merging
+        several input dataframes, namely the following : 
+        - likes_dislikes_df
+        - play_activity_df
+        - identifier_infos_df
+        - library_tracks_df
+        and library_activity_df
+
+        Args:
+            input_df - a dictionary of dataframes of the followwing format
+            {  "identifier_infos_df" : identifier_infos_df,
+            "library_tracks_df" : library_tracks_df,
+            "library_activity_df" : library_activity_df,
+            "likes_dislikes_df" : likes_dislikes_df,
+            "play_activity_df" : play_activity_df    }
+
+        Raises:
+            raises an exception if the input_df doesn't have the format described above
+
+        Modules:
+            When creating a new instance of this class, the following process is automatically carried on:
+            1. Create a instance of Parser with the input_df
+            2. The Parser instance has a source_dataframes dictionary that contains the parsed input_df (parsed = cleaned)
+            From this source_dataframes dictionary, get each dataframe.
+            3. Create an instance of ProcessTracks
+            4. Process each of the individual dataframes
+            5. Create an instance of TrackSummaryObject, used in particular to be able to merge infos between dataframes
+            6. Build the output df_visualization dataframe
+            Refer to the documentation of Parser and Process for more details.
+
+    '''
+
     def __init__(self, input_df):
         self.input_df = input_df
         self.parser = Parser(input_df)
@@ -44,6 +78,10 @@ class VisualizationDataframe():
         return self.likes_dislikes_df
 
     def get_df_from_source(self):
+        '''
+            Sets dataframes as instance properties.
+            If the parsing of the input failed (Parser.source_dataframes is empty), an error is raised.
+        '''
         if self.source_dataframes != {}:
             self.likes_dislikes_df = self.parser.likes_dislikes_df
             self.play_activity_df = self.parser.play_activity_df
@@ -54,6 +92,10 @@ class VisualizationDataframe():
             raise Exception('No source dataframe provided.')
 
     def process_tracks_in_df(self):
+        '''
+            Calls the process methods of the ProcessTracks instance on the parsed dataframes.
+            If the parsing of the input failed (Parser.source_dataframes is empty), an error is raised.
+        '''
         if self.source_dataframes != {}:
             # we process the library tracks
             self.process_tracks.process_library_tracks_df(self.library_tracks_df)
@@ -67,6 +109,12 @@ class VisualizationDataframe():
             raise Exception('No source dataframe provided.')
 
     def build_df_visualisation(self):
+        '''
+            Constructs the output dataframe ready for analysis and visualizations. 
+            The play_activity dataframe is used as a reference. Are appended to this dataframe three columns
+            populated with the information coming from the data structure built with ProcessTracks.
+            Empty values are filled, column names are cleaned up (space replaced by '_').
+        '''
         self.track_summary_objects.build_index_track_instance_dict('play_activity')
         match_index_instance_activity = self.track_summary_objects.match_index_instance
         index_instance_df = pd.DataFrame.from_dict(match_index_instance_activity, orient='index', columns=['Track Instance', 'Library Track', 'Rating', 'Genres'])

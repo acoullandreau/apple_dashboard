@@ -434,9 +434,6 @@ class BarChartVisualization():
             height = self.height,
         )
 
-
-
-
 class PieChartVisualization():
 
     '''
@@ -455,9 +452,7 @@ class PieChartVisualization():
             pie_chart.figure.show()
 
     '''
-
-
-
+    
     def __init__(self, serie_to_plot):
         self.serie_to_plot = serie_to_plot
         self.title = 'Pie chart'
