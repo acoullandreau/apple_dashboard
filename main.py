@@ -8,21 +8,14 @@ import time
 start0 = time.time()
 
 # get the input files
-input_df = Utility.get_df_from_archive('Apple_Media_Services_L.zip')
+#input_df = Utility.get_df_from_archive('Apple_Media_Services_L.zip')
 
 # create an instance of the visualization dataframe class
-df_viz = VisualizationDataframe(input_df)
+#df_viz = VisualizationDataframe(input_df)
 #Utility.save_to_pickle(df_viz, 'df_viz.pkl')
 
-#df_viz = Utility.load_from_pickle('df_viz.pkl')
+df_viz = Utility.load_from_pickle('df_viz.pkl')
 
-
-
-# print(df_viz.likes_dislikes_df.shape)
-# print(df_viz.play_activity_df.shape)
-# print(df_viz.identifier_infos_df.shape)
-# print(df_viz.library_tracks_df.shape)
-# print(df_viz.library_activity_df.shape)
 
 ###########################################################################################################################
 #extract a df using a query
@@ -39,10 +32,9 @@ df_viz = VisualizationDataframe(input_df)
 # query_params = {
 #     'year':[2016, 2017, 2018, 2019],
 # }
-# ranking_dict = df_viz.track_summary_objects.build_ranking_dict_per_year(df_viz.get_df_viz(), 'Artist', query_params)
-# sunburst = SunburstVisualization(ranking_dict, 'Artist')
+# ranking_dict = df_viz.track_summary_objects.build_ranking_dict_per_year(df_viz.get_df_viz(), 'Genres') #optional query_params
+# sunburst = SunburstVisualization(ranking_dict, 'Genre')
 # sunburst.render_sunburst_plot()
-
 
 
 ###########################################################################################################################
@@ -53,7 +45,8 @@ df_viz = VisualizationDataframe(input_df)
 # }
 # ranking_dict = df_viz.track_summary_objects.build_ranking_dict_per_year(df, 'Genres', query_params)
 # ranking = RankingListVisualization(ranking_dict, 5)
-# print(ranking.ranked_dict)
+# ranking.get_ranked_dict(print_output=True)
+
 
 
 ###########################################################################################################################
@@ -187,6 +180,20 @@ df_viz = VisualizationDataframe(input_df)
 #     y_serie = df[df['Play_Year']==year]['Play_HOD'].value_counts()
 #     bar_chart.render_bar_chart(x_serie, y_serie, str(year))
 
+# bar_chart.figure.show()
+
+
+# plot subplots of bar chart - HOD, single year
+# # get the input df 
+# df = df_viz.get_df_viz()
+# df = df[df['Play_Year']==2020]
+# # create the BarChart instance
+# bar_chart = BarChartVisualization(df)
+# # render the plot
+# x_serie = df['Play_HOD'].unique()
+# y_serie = df['Play_HOD'].value_counts()
+# bar_chart.render_bar_chart(x_serie, y_serie, '2020')
+# # display the rendered plot
 # bar_chart.figure.show()
 
 
