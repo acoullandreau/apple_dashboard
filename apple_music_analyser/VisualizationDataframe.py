@@ -28,6 +28,19 @@ class VisualizationDataframe():
         Raises:
             raises an exception if the input_df doesn't have the format described above
 
+        Methods:
+            __init__(input_df)
+            get_df_viz()
+            get_source_dataframes()
+            get_play_activity_df()
+            get_identifier_info_df()
+            get_library_tracks_df()
+            get_library_activity_df()
+            get_likes_dislikes_df()
+            get_df_from_source()
+            process_tracks_in_df()
+            build_df_visualisation()
+
         Modules:
             When creating a new instance of this class, the following process is automatically carried on:
             1. Create a instance of Parser with the input_df

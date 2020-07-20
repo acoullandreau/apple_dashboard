@@ -30,6 +30,20 @@ class ProcessTracks():
             with the following format
                 {'library_tracks':[], 'identifier_info':[],'play_activity':[], 'likes_dislikes':[]}
 
+        Methods:
+            __init__()
+            get_track_instance_dict()
+            get_artist_tracks_titles()
+            get_genres_list()
+            get_items_not_matched()
+            get_increment()
+            update_track_instance(origin_df, track_instance, index, row)
+            compare_titles_for_artist(artist, title_to_compare)
+            process_library_tracks_df(library_tracks_df)
+            process_identifier_df(identifier_infos_df)
+            process_play_df(play_activity_df)
+            process_likes_dislikes_df(likes_dislikes_df)           
+
         The methods that parse each df can be called seperately, but only process_library_tracks_df and process_play_df will create
         new instances of Track (the other can only update existing instances). Besides, process_identifier_df requires that the
         existing instances of Tracks have their attribute apple_music_id populated, so it should be executed after processing
@@ -393,6 +407,20 @@ class TrackSummaryObject():
             items_not_matched - dictionary of the following structure listing all the indexes associated
             with each df processed
                 {'library_tracks':[], 'identifier_info':[],'play_activity':[], 'likes_dislikes':[]}
+
+        Methods:
+            __init__(track_instance_dict, artist_tracks_titles, genres_list, items_not_matched)
+            get_track_instance_dict()
+            get_artist_tracks_titles()
+            get_genres_list()
+            get_items_not_matched()
+            get_match_index_instance()
+            build_index_track_instance_dict(target_df_label)
+            simplify_genre_list(genres_list)
+            build_genres_count_dict(genres_serie)
+            build_count_dict(target_serie)
+            build_ranking_dict_per_year(df, ranking_target, query_params=None)
+
     '''
 
     def __init__(self, track_instance_dict, artist_tracks_titles, genres_list, items_not_matched):

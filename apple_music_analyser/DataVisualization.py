@@ -23,6 +23,11 @@ class SunburstVisualization():
                 This dictionary can be obtained using the build_ranking_dict_per_year method from the Process.TrackSummaryObject class 
             center_title - OPTIONAL, the title to display in the center of the plot
 
+        Methods:
+            __init__(viz_dict, center_title='')
+            build_sunburst_arrays()
+            render_sunburst_plot()
+
         Example:
             #build the viz_dict
             ranking_dict = df_viz.track_summary_objects.build_ranking_dict_per_year(df_viz.get_df_viz(), 'Genres')
@@ -113,6 +118,11 @@ class RankingListVisualization():
                 This dictionary can be obtained using the build_ranking_dict_per_year method from the Process.TrackSummaryObject class 
             number_of_items_in_ranking - by default set to 10, the number of items we want to be in the ranked dict
 
+        Methods:
+            __init__(viz_dict, number_of_items_in_ranking=10)
+            rank_items_in_dict()
+            get_ranked_dict(print_output=False)
+
         Example:
             #build the viz_dict
             ranking_dict = df_viz.track_summary_objects.build_ranking_dict_per_year(df, 'Genres')
@@ -171,6 +181,12 @@ class HeatMapVisualization():
             title - string used to identify the subplot, for example, the year plotted, or the month
             type - whether it is a DOM or a DOW plot, i.e. month on x-axis, and day of the month (DOM) on y-axis, or
             week day on x-axis, and hour of the day (HOD) on y-axis
+
+        Methods:
+            __init__(df_viz, with_subplots=1)
+            build_day_heat_map(title)
+            build_week_heat_map(title)
+            update_figure_info()
 
         Example - single plot:
             # get the filtered input df
@@ -310,6 +326,12 @@ class BarChartVisualization():
             y_serie - either the count of song, or the percentage of songs
             name - useful in particular for the subplot, for example, the year plotted
 
+        Methods:
+            __init__(df_viz, with_subplots=0)
+            create_figure()
+            build_bar_chart(x_serie, y_serie, name)
+            render_bar_chart(x_serie, y_serie, name)
+
         Example - single plot:
             # get the input df 
             df = df_viz.get_df_viz()
@@ -392,6 +414,10 @@ class BarChartVisualization():
         self.data = None
 
     def create_figure(self):
+        '''
+            This method is in charge of creating a plotly figure, according to
+            whether we want subplots or not (different Plotly function called).
+        '''
         if self.with_subplots == 0:
             return go.Figure()
         else:
@@ -442,6 +468,12 @@ class PieChartVisualization():
 
         Args: 
             serie_to_plot - the serie that will be used to populate the pie chart
+
+        Methods:
+            __init__(serie_to_plot)
+            build_pie()
+            render_pie_chart()
+            update_figure_info()
 
         Example:
             # create the PieChart instance

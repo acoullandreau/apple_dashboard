@@ -27,6 +27,21 @@ class Track():
             genre (list) - a list of all the genres associated with this track
             apple_music_id (list) - a list of all the ids used by Apple to identify the track
             rating (list) - a list of all the ratings associated with this track
+
+        Methods:
+            __init__(identifier)
+            has_title_name(title)
+            add_title(title)
+            set_artist(artist)
+            set_apple_music_id(apple_music_id)
+            set_library_flag()
+            set_genre(genre)
+            add_appearance(appearance_dict)
+            set_rating(rating)
+            instantiate_track(title, artist)
+            update_track_from_library(index, row)
+            update_track_from_play_activity(index, row)
+            
     '''
 
     def __init__(self, identifier):
@@ -40,29 +55,51 @@ class Track():
         self.rating = []
     
     def has_title_name(self, title):
+        '''
+            Test whether a title is already in self.titles. 
+            Returns a boolean.
+        '''
         if title in self.titles:
             return True
         return False
     
     def add_title(self, title):
+        '''
+            Appends a title to self.titles. 
+        '''
         self.titles.append(title)
     
     def set_artist(self, artist):
+        '''
+            Assigns artist to self.artist.
+        '''
         self.artist = artist
     
     def set_apple_music_id(self, apple_music_id):
+        '''
+            Appends apple_music_id if not in self.apple_music_id.
+        '''
         if apple_music_id not in self.apple_music_id:
             self.apple_music_id.append(apple_music_id)
                
     def set_library_flag(self):
+        '''
+            Sets the flag self.is_in_lib to True. 
+        '''
         self.is_in_lib = True
     
     def set_genre(self, genre):
+        '''
+            Appends genre if not NaN and not in self.genre.
+        '''
         if type(genre) != float:
             if genre not in self.genre:
                 self.genre.append(genre.strip())
         
     def add_appearance(self, appearance_dict):
+        '''
+            Appends a new appearance dict to self.appearances.
+        '''
         self.appearances.append(appearance_dict)
 
     def set_rating(self, rating):
