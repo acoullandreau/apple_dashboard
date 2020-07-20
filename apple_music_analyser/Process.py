@@ -35,13 +35,18 @@ class ProcessTracks():
         return self.increment
 
     def update_track_instance(self, origin_df, track_instance, index, row):
+        '''
+            This function calls update_track_from_play_activity or 
+            update_track_from_library depending on origin_df. It also 
+            updates the genres_list object.
+            It is used to simplify the structure of the processing methods.
+        '''
         if origin_df == 'play_activity_df':
             track_instance.update_track_from_play_activity(index, row)
             if row['Genre'] not in self.genres_list:
                 self.genres_list.append(row['Genre'])
         elif origin_df == 'library_tracks_df':
             track_instance.update_track_from_library(index, row)
-            #we update the dictionary that keeps track of our instances, and increment
             if row['Genre'] not in self.genres_list:
                 self.genres_list.append(row['Genre'])
         else:
@@ -373,12 +378,19 @@ class TrackSummaryObject():
 
     @staticmethod
     def simplify_genre_list(genres_list):
+        '''
+            This method will replace NaN value with '' and remove extra spaces.
+        '''
         genres_list_clean = [x if str(x) != 'nan' else '' for x in genres_list]
         genres_list_clean = [x.strip() for x in genres_list_clean]
         return genres_list_clean
 
 
     def build_genres_count_dict(self, genres_serie):
+        '''
+            This method builds a dictionary with a genre as a key and a count of occurence of
+            this genre as a value, using a pandas serie as an input.
+        '''
         genres_count_dict = {}
         for ref_genre in self.genres_list:
             genres_count_dict[ref_genre] = 0
@@ -394,6 +406,10 @@ class TrackSummaryObject():
         return genres_count_dict
 
     def build_count_dict(self, target_serie):
+        '''
+            This method builds a dictionary with a target element as a key (for example Artist, Title)
+            and a count of occurence of this element as a value, using a pandas serie as an input.
+        '''
         ref_list = target_serie.unique()
         
         count_dict = {}
@@ -409,6 +425,31 @@ class TrackSummaryObject():
         return count_dict
 
     def build_ranking_dict_per_year(self, df, ranking_target, query_params=None):
+        '''
+            This method builds a dictionary of dictionaries of counts. 
+            The keys of the output dict is a year, and for each year, the value is a 
+            count dict for a target element (for example Genre, Artist, Title). 
+
+            Args:
+                df - the dataframe from which series are used to build count dict
+                    This dataframe MUST contain at least a column Play_Year and the
+                    column used as a target element (see below)
+                ranking_target - the target to use for the count dict, can be of four types:
+                    - Genres
+                    - Artist
+                    - Track_origin
+                    - Title
+                    The choosen target MUST be a column name of the input dataframe.
+                query_param - OPTIONAL, used to perform a filter on the dataframe.
+
+            Logic:
+                - if no filtering parameters are passed, the output dict will have one
+                key per year present in the input df (column 'Play_Year')
+                - for each year, if further filtering is required, a filtered_df is constructed
+                and a count dict is built using the appropriate function (build_genres_count_dict
+                if the target is 'Genres', build_count_dict otherwise)
+
+        '''
         ranking_dict = {}
         if query_params == None:
             query_params = {
