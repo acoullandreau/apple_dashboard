@@ -2,6 +2,11 @@
 
 class QueryFactory():
 
+    '''
+        This class actually decides which instance of the Query class to create, depending
+        on the arguments passed in its create_query method.
+    '''
+
     def create_query(self, reference_df, params_dict=None):
         '''
             This function is meant to create a Query instance with a parameters dict.
@@ -38,6 +43,40 @@ class QueryFactory():
 
 class Query():
 
+    '''
+        This class is responsible for generating a query string and a filtered dataframe. 
+
+        Args:
+            reference_df - the dataframe that is to be filtered
+            query_params - a dictionary of parameters used to perform the filter, of the following format
+                params_dict = {
+                    'year':list,
+                    'genre':list,
+                    'artist':list,
+                    'title':list,
+                    'rating':list,
+                    'origin':list,
+                    'offline':bool,
+                    'library':bool,
+                    'skipped':bool,
+                }
+            query_string - the string used to query the df
+            filtered_df - the df filtered using the query
+
+        Methods:
+            __init__(reference_df, query_params)
+            get_query_params()
+            get_query_string()
+            get_filtered_df()
+            filter_df()
+            manage_query_filters()
+            build_string_query_element(category, query_values)
+            build_numeric_query_element(category, query_values)
+            build_boolean_query_element(category, query_value)
+            build_data_query
+
+    '''
+
     def __init__(self, reference_df, query_params):
         self.reference_df = reference_df
         self.query_params = query_params
@@ -54,6 +93,10 @@ class Query():
         return self.filtered_df
 
     def filter_df(self):
+        '''
+            Returns the reference_df (used to instantiate Query) filtered
+            using self.query_string
+        '''
         filtered_df = self.reference_df.query(self.query_string)
         return filtered_df
 
