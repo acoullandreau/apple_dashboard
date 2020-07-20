@@ -20,14 +20,15 @@ class ProcessTracks():
 
         Args:
             There is no argument to pass to instantiate the class.
-            However, each instance has the following attributes : 
-                increment (int) - used to assign a unique id to each track instance
-                track_instance_dict (dict) - used to keep track of the title/artist combination with the ref of the associated track instance
-                artist_tracks_titles (dict) - used to keep track of all the titles of an artist, including different spellings of the same title
-                genres_list (list) - used to keep track of all the unique values of genres
-                items_not_matched (dict of lists) - used to keep track of the rows that were not matched in all dataframes processed,
-                with the following format
-                    {'library_tracks':[], 'identifier_info':[],'play_activity':[], 'likes_dislikes':[]}
+        
+        Attributes: 
+            increment (int) - used to assign a unique id to each track instance
+            track_instance_dict (dict) - used to keep track of the title/artist combination with the ref of the associated track instance
+            artist_tracks_titles (dict) - used to keep track of all the titles of an artist, including different spellings of the same title
+            genres_list (list) - used to keep track of all the unique values of genres
+            items_not_matched (dict of lists) - used to keep track of the rows that were not matched in all dataframes processed,
+            with the following format
+                {'library_tracks':[], 'identifier_info':[],'play_activity':[], 'likes_dislikes':[]}
 
         The methods that parse each df can be called seperately, but only process_library_tracks_df and process_play_df will create
         new instances of Track (the other can only update existing instances). Besides, process_identifier_df requires that the

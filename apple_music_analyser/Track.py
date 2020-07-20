@@ -1,11 +1,34 @@
 
 
 class Track():
-    # the instances of this class are songs, identified using either a combination of their
-    # title and artist names, or an identifier when available
-    # we track in which file we found the track for (appearance), as well as rating, genre and whether
-    # it is in the library or not
-    
+
+    '''
+        This class allows the representation and description of each track present in a df.
+        The instances of this class are songs, identified using either a combination of their
+        title and artist names, or an identifier when available
+        We track in which file we found the track for (appearance), as well as rating, genre and whether
+        it is in the library or not
+
+        Args:
+            identifier - a unique id (can be of any type, int, string....)
+
+        Attributes:
+            titles (list) - a list of all the titles this track is identifiable with
+            artist (str) - the artist of the track
+            is_in_lib (bool) - whether the track is in the library
+            appearances (list) - a list of dict of the following formats
+                {'source': source, 'df_index':index}
+                where source can take 4 different values : 
+                    - 'play_activity',
+                    - 'identifier_info'
+                    - 'likes_dislikes'
+                    - 'library_tracks'
+
+            genre (list) - a list of all the genres associated with this track
+            apple_music_id (list) - a list of all the ids used by Apple to identify the track
+            rating (list) - a list of all the ratings associated with this track
+    '''
+
     def __init__(self, identifier):
         self.identifier = identifier
         self.titles = []
@@ -43,6 +66,12 @@ class Track():
         self.appearances.append(appearance_dict)
 
     def set_rating(self, rating):
+        '''
+            This method uniformises the rating value.
+            For LOVE and LIKE it is set to LOVE.
+            For DISLIKE it remains DISLIKE.
+            For any other rating, nothing is added to the track attribute. 
+        '''
         if rating == 'LOVE' or rating == 'LIKE':
             if 'LOVE' not in self.rating:
                 self.rating.append(rating)
