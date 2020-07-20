@@ -4,6 +4,43 @@ from apple_music_analyser.Utility import Utility
 
 class ProcessTracks():
 
+    '''
+        This class is responsible for building a data structure of tracks from various input dataframes, 
+        namely the following : 
+        - likes_dislikes_df
+        - play_activity_df
+        - identifier_infos_df
+        - library_tracks_df
+
+        With this class, we identify characteristics of the tracks listened to, and for each of them
+        we create and update a instance of the Track class (see Track module for more details).
+        Going through the rows of each input dataframe, we try to identify the songs that may
+        represent the same track but with different titles, its associated genres, for each artist
+        all the songs listened to, etc.
+
+        Args:
+            There is no argument to pass to instantiate the class.
+            However, each instance has the following attributes : 
+                increment (int) - used to assign a unique id to each track instance
+                track_instance_dict (dict) - used to keep track of the title/artist combination with the ref of the associated track instance
+                artist_tracks_titles (dict) - used to keep track of all the titles of an artist, including different spellings of the same title
+                genres_list (list) - used to keep track of all the unique values of genres
+                items_not_matched (dict of lists) - used to keep track of the rows that were not matched in all dataframes processed,
+                with the following format
+                    {'library_tracks':[], 'identifier_info':[],'play_activity':[], 'likes_dislikes':[]}
+
+        The methods that parse each df can be called seperately, but only process_library_tracks_df and process_play_df will create
+        new instances of Track (the other can only update existing instances). Besides, process_identifier_df requires that the
+        existing instances of Tracks have their attribute apple_music_id populated, so it should be executed after processing
+        the library_tracks_df.
+        Therefore it makes sense to call the methods in this order (2 and 3 can be swapped):
+            1. process_library_tracks_df(library_tracks_df)
+            2. process_identifier_df(identifier_infos_df)
+            3. process_play_df(play_activity_df)
+            4. process_likes_dislikes_df(likes_dislikes_df)
+    '''
+
+
     def __init__(self):
         ## this is used to assign a unique id to each track instance
         self.increment = 0
@@ -330,6 +367,32 @@ class ProcessTracks():
 
 
 class TrackSummaryObject():
+
+    '''
+        This class is responsible for building two main types of objects using the data structure of tracks
+        constructed by Process.ProcessTracks :
+        - count dictionaries
+        - dataframe index / track instance matching dictionary
+        
+        The dataframe index / track instance matching dictionary is used to be able to add information
+        from the track instances to any of the input dataframes, at the relevant rows. For example, we may
+        want to add a pointer to the track instance in a df, or add the rating associated to the track to 
+        a dataframe that doesn't contain this information. 
+        As part of building the data structure of tracks, we keep track of the "appearance" property,
+        that matches the dataframe name with the index we saw the track in.
+
+        Args:
+            ------ For the instance
+            The attributes of a ProcessTracks class
+            track_instance_dict - dictionary that contains a 'title && artist' combined key, and the
+            reference of the associated track instance
+            artist_tracks_titles - dictionary that contains the artist name as a key and an array of titles
+            associated to this artist
+            genres_list - list of all the unique values of genres
+            items_not_matched - dictionary of the following structure listing all the indexes associated
+            with each df processed
+                {'library_tracks':[], 'identifier_info':[],'play_activity':[], 'likes_dislikes':[]}
+    '''
 
     def __init__(self, track_instance_dict, artist_tracks_titles, genres_list, items_not_matched):
         self.track_instance_dict = track_instance_dict
