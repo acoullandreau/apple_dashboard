@@ -62,17 +62,14 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(df.shape, expected_output.shape) 
         self.assertEqual(df.columns.tolist(), expected_output.columns.tolist()) 
 
-    # def test_get_df_from_archive(self):
-    #   '''
-    #       We only test the case where the path is wrong
-    #       This function relies on external package (ZipFile), well covered by tests.
-    #   '''
-    #   archive_path = None
-    #   result = Utility.get_df_from_archive(archive_path)
-    #   self.assertEqual(result, {})
-
-
-
+    def test_get_df_from_archive(self):
+      '''
+          We only test the case where the path is wrong
+          This function relies on external package (ZipFile), well covered by tests.
+      '''
+      archive_path = None
+      result = Utility.get_df_from_archive(archive_path)
+      self.assertEqual(result, {})
 
 
 class TestTrack(unittest.TestCase):
@@ -123,7 +120,6 @@ class TestTrack(unittest.TestCase):
         self.track.set_genre(genre)
         self.assertEqual(self.track.genre, ['Genre'])
 
-
     def test_add_appearance(self):
         appearance_dict = {'source': 'source', 'df_index':'index'}
         self.track.add_appearance(appearance_dict)
@@ -146,7 +142,6 @@ class TestTrack(unittest.TestCase):
     @classmethod
     def tearDown(self):
         self.track = None
-
 
 
 class TestQueryFactory(unittest.TestCase):
@@ -206,7 +201,6 @@ class TestQueryFactory(unittest.TestCase):
         self.assertEqual(len(query.query_params['year']), 1)
         self.assertEqual(query.query_params['genre'], ['Genre_1'])
 
-
     @classmethod
     def tearDownClass(self):
         self.reference_df = None
@@ -238,6 +232,9 @@ class TestQuery(unittest.TestCase):
         self.query = Query(self.reference_df, self.query_params)
 
     def test_init_Query(self):
+        '''
+            query_string and filtered_df are tested in individual tests
+        '''
         self.assertTrue(isinstance(self.query, Query))
         self.assertEqual(self.query.reference_df.shape, self.reference_df.shape)
         self.assertEqual(self.query.reference_df.columns.tolist(), self.reference_df.columns.tolist())
@@ -245,7 +242,6 @@ class TestQuery(unittest.TestCase):
         self.assertEqual(len(self.query.query_params), len(self.query_params))
         self.assertEqual(len(self.query.query_params['year']), 1)
         self.assertEqual(self.query.query_params['genre'], ['Genre_1'])
-        # query_string and filtered_df are tested in individual tests
 
     def test_get_query_params(self):
         result = self.query.get_query_params()
@@ -367,7 +363,6 @@ class TestParser(unittest.TestCase):
         self.assertEqual(df.iloc[1, 3], True)
         self.assertEqual(df.iloc[2, 3], False)
 
-
     def test_get_track_origin(self):
         df = pd.DataFrame.from_dict({
             'Feature Name':['library / playlist_detail', 'my-music', 'for_you / personalized_mix / playlist_detail', 'now_playing', 'for_you / playlist_detail / album_detail',
@@ -380,7 +375,6 @@ class TestParser(unittest.TestCase):
         self.assertEqual(df.shape[1], shape_input_df[1] + 1)
         self.assertIn('Track origin', df.columns)
         self.assertEqual(df['Track origin'].tolist(), ['library', 'library', 'for you - personalized mix', 'other', 'for you - other', 'search', 'other', 'for you - recently played', 'other', 'library'])
-
 
     def test_compute_play_duration(self):
         df = pd.DataFrame.from_dict({
@@ -405,7 +399,6 @@ class TestParser(unittest.TestCase):
         self.assertEqual(int(df.iloc[0, 5]), 3)
         self.assertEqual(df.iloc[1, 5], 2)
         self.assertEqual(df.iloc[2, 5], 1)
-
 
     def test_remove_play_duration_outliers(self):
         df = pd.DataFrame.from_dict({
@@ -446,7 +439,6 @@ class TestParser(unittest.TestCase):
         self.assertIn('Track origin', result.columns)
         self.assertIn('Play duration in minutes', result.columns)
 
-
     def test_init_Parser(self):
         input_df = Utility.get_df_from_archive('test_df.zip')
         shape_input_likes_dislikes_df = input_df['likes_dislikes_df'].shape
@@ -469,8 +461,6 @@ class TestParser(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         self.input_df = None
-
-
 
 
 class TestProcess(unittest.TestCase):
@@ -556,14 +546,13 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(self.track_instance.genre, ['French Pop'])
         self.assertEqual(self.track_instance.appearances, [{'source': 'library_tracks', 'df_index': 30}])
 
-    # def test_update_track_instance_other(self):
-    #     index_other = 10
-    #     row_other = self.identifier_infos_df.iloc[10]
-    #     self.process.update_track_instance('identifier_infos_df', self.track_instance, index_other, row_other)
-    #     self.assertEqual(self.process.genres_list, [])
-    #     self.assertEqual(self.track_instance.genre, [])
-    #     self.assertEqual(self.track_instance.appearances, [])
-
+    def test_update_track_instance_other(self):
+        index_other = 10
+        row_other = self.identifier_infos_df.iloc[10]
+        self.process.update_track_instance('identifier_infos_df', self.track_instance, index_other, row_other)
+        self.assertEqual(self.process.genres_list, [])
+        self.assertEqual(self.track_instance.genre, [])
+        self.assertEqual(self.track_instance.appearances, [])
 
     def test_process_library_tracks_df(self):
         self.process.process_library_tracks_df(self.library_tracks_df)
@@ -667,7 +656,6 @@ class TestProcess(unittest.TestCase):
         ids_from_library = [int(x) for x in self.library_tracks_df[self.library_tracks_df['Title']=='Nicolas Le Floch - Générique'][['Apple Music Track Identifier', 'Track Identifier', 'Purchased Track Identifier', 'Tag Matched Track Identifier']].values[0]]
         self.assertIn(int(self.process.track_instance_dict['Nicolas Le Floch - Générique && Stéphane Moucha'].apple_music_id[0]), ids_from_library)
 
-
     @classmethod
     def tearDown(self):
         self.process = None
@@ -678,9 +666,6 @@ class TestProcess(unittest.TestCase):
         self.library_tracks_df = None
         self.library_activity_df = None
         self.track_instance = None
-
-
-
 
 
 class TestProcessTrackSummaryObject(unittest.TestCase):
@@ -820,7 +805,6 @@ class TestProcessTrackSummaryObject(unittest.TestCase):
         self.assertEqual(result['Item_1'], 2)
         self.assertEqual(result['Item_2'], 1)
 
-
     def test_build_ranking_dict_per_year_per_genre(self):
         df = pd.DataFrame.from_dict({
             'Play_Year':[2020, 2020, 2020, 2019],
@@ -840,7 +824,6 @@ class TestProcessTrackSummaryObject(unittest.TestCase):
         self.assertEqual(result[2019]['Rock'], 1)
         self.assertEqual(result[2019]['Pop'], 0)
         self.assertEqual(result[2019]['Soundtrack'], 0)
-
 
     def test_build_ranking_dict_per_year_per_artist(self):
         df = pd.DataFrame.from_dict({
@@ -888,7 +871,6 @@ class TestProcessTrackSummaryObject(unittest.TestCase):
         cls.artist_tracks_titles = None
         cls.genres_list = None
         cls.items_not_matched = None
-
 
 
 class TestVisualizationDataframe(unittest.TestCase):
@@ -1000,9 +982,6 @@ class TestVisualizationDataframe(unittest.TestCase):
         # all spaces in column names have been replaces by '_'
         for column_name in result.columns:
             self.assertNotIn(' ', column_name)
-
-
-
 
 if __name__ == '__main__':
     unittest.main()

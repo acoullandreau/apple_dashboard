@@ -461,7 +461,7 @@ class PieChartVisualization():
         self.data = None
 
     def build_pie(self):
-                '''
+        '''
             This function is in charge of building a pie chart.
         '''
         labels = self.serie_to_plot.dropna().unique()
