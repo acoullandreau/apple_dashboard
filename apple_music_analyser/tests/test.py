@@ -311,6 +311,11 @@ class TestParser(unittest.TestCase):
         for i in range(len(list(result.values()))):
             self.assertTrue(isinstance(list(result.values())[i], pd.DataFrame))
 
+    def test_parse_source_dataframes_bad_input(self):
+        parser = Parser(self.input_df)
+        parser.source_dataframes = {}
+        self.assertRaises(Exception, parser.parse_source_dataframes)
+
     def test_parse_library_activity_df(self):
         library_activity_df = self.input_df['library_activity_df']
         shape_input_df = library_activity_df.shape

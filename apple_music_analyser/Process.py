@@ -456,9 +456,12 @@ class TrackSummaryObject():
                 - likes_dislikes
                 - identifier_info
         '''
+        # for each combination of 'title && artist', we look at the appearances of the associated track instance
         for title_artist in self.track_instance_dict.keys():
             instance = self.track_instance_dict[title_artist]
             for appearance in instance.appearances:
+                # if the targeted df is listed among the recorded appearances, we add the related indexes to a dict
+                # along with the instance reference, the library flag, the rating and the genre(s)
                 if target_df_label in appearance['source']:
                     if appearance['df_index'] not in self.match_index_instance:
                         self.match_index_instance[appearance['df_index']] = []
@@ -484,8 +487,10 @@ class TrackSummaryObject():
             this genre as a value, using a pandas serie as an input.
         '''
         genres_count_dict = {}
+        # we add a key per unique genre listed in genres_list
         for ref_genre in self.genres_list:
             genres_count_dict[ref_genre] = 0
+        # for each element of genre array in genres_serie, we increment the count in the dict
         for genre_in_serie in genres_serie.tolist():
             if '&&' in genre_in_serie:
                 genres = genre_in_serie.split('&&')
@@ -505,9 +510,12 @@ class TrackSummaryObject():
         ref_list = target_serie.unique()
         
         count_dict = {}
+        # we add a key per unique genre not NaN available in target_serie
         for ref_elem in ref_list:
             if str(ref_elem) != 'nan':
                 count_dict[ref_elem] = 0
+
+        # for each element in target_serie, we increment the count in the dict
         for df_elem in target_serie.tolist():
             if str(df_elem) != 'nan':
                 if df_elem in count_dict.keys():

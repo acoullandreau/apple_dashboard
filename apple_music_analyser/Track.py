@@ -41,7 +41,7 @@ class Track():
             instantiate_track(title, artist)
             update_track_from_library(index, row)
             update_track_from_play_activity(index, row)
-            
+
     '''
 
     def __init__(self, identifier):
@@ -140,6 +140,8 @@ class Track():
         self.add_appearance({'source': 'library_tracks', 'df_index':index})
         self.set_genre(row['Genre'])
         self.set_rating(row['Track Like Rating'])
+        # we add all the unique ids associated to this track,coming from multiple columns of the library_track df
+        # Apple Music Track Identifier, Tag Matched Track Identifier or Purchased Track Identifier
         if str(row['Apple Music Track Identifier'])!='nan':
             self.set_apple_music_id(str(int(row['Apple Music Track Identifier'])))
             if str(row['Tag Matched Track Identifier']) !='nan' and row['Tag Matched Track Identifier'] != row['Apple Music Track Identifier']:

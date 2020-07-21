@@ -126,10 +126,12 @@ class Query():
         '''
         if len(query_values) == 1:
             query_element = '{0}.str.contains("{1}")'.format(category, query_values[0])
+        # if exactly two query values, we need only one OR (|)
         elif len(query_values) == 2:
             first_item = '{0}.str.contains("{1}")'.format(category, query_values[0])
             last_item = '{0}.str.contains("{1}")'.format(category, query_values[-1])
             query_element = '(' + first_item + '|' + last_item + ')'
+        # if more than two query values, we need to chain the OR (|)
         else:
             first_item = '{0}.str.contains("{1}")'.format(category, query_values[0])
             last_item = '{0}.str.contains("{1}")'.format(category, query_values[-1])
@@ -155,10 +157,12 @@ class Query():
         '''
         if len(query_values) == 1:
             query_element = '{0}=={1}'.format(category, query_values[0])
+        # if exactly two query values, we need only one OR (|)
         elif len(query_values) == 2:
             first_item = '{0}=={1}'.format(category, query_values[0])
             last_item = '{0}=={1}'.format(category, query_values[-1])
             query_element = '(' + first_item + '|' + last_item + ')'
+        # if more than two query values, we need to chain the OR (|)
         else:
             first_item = '{0}=={1}'.format(category, query_values[0])
             last_item = '{0}=={1}'.format(category, query_values[-1])

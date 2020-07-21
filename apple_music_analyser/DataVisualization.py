@@ -82,6 +82,7 @@ class SunburstVisualization():
         self.ids = ids
 
     def render_sunburst_plot(self):
+        # Create the figure
         fig =go.Figure(go.Sunburst(
             ids=self.ids,
             labels=self.labels,
