@@ -1,4 +1,5 @@
 from difflib import SequenceMatcher
+import os
 import pandas as pd
 import pickle
 from zipfile import ZipFile
@@ -24,32 +25,46 @@ class Utility():
     '''
 
     @staticmethod
-    def get_df_from_archive(archive_path):
+    def get_df_from_archive(archive_path, target_files_dict=None):
         '''
             This method accepts a zip file as an input. The zip file must CONTAIN the following structure:
-            Apple Music Activity (folder)
-                |_ Identifier Information.json.zip
-                |_ Apple Music Library Tracks.json.zip
-                |_ Apple Music Library Activity.json.zip
-                |_ Apple Music Likes and Dislikes.csv
-                |_ Apple Music Activity/Apple Music Play Activity.csv
+            Apple_Media_Services (folder)
+                |_ Apple Music Activity (folder)
+                    |_ Identifier Information.json.zip
+                    |_ Apple Music Library Tracks.json.zip
+                    |_ Apple Music Library Activity.json.zip
+                    |_ Apple Music Likes and Dislikes.csv
+                    |_ Apple Music Activity/Apple Music Play Activity.csv
+            
+            It is possible to pass as a parameter a different structure of the archive, with the path to
+            each file WITHIN the archive, like so:
+            target_files = {
+                'identifier_infos_path' : 'Path_to_file_within_archive/Identifier Information.json.zip',
+                'library_tracks_path' : 'Path_to_file_within_archive/Apple Music Library Tracks.json.zip',
+                'library_activity_path': 'Path_to_file_within_archive/Apple Music Library Activity.json.zip',
+                'likes_dislikes_path' : 'Path_to_file_within_archive/Apple Music Likes and Dislikes.csv',
+                'play_activity_path': 'Path_to_file_within_archive/Apple Music Play Activity.csv'
+            }
 
-            The expected format of each file can either be csv, json or json.zip.
+            The expected format of each file is as indicated above in the target_files dict (csv, json or json.zip).
 
             An error message is printed if the zip file provided does not have the right format.
         '''
+
+        if target_files_dict == None:
+            target_files = {
+                'identifier_infos_path' : 'Apple_Media_Services/Apple Music Activity/Identifier Information.json.zip',
+                'library_tracks_path' : 'Apple_Media_Services/Apple Music Activity/Apple Music Library Tracks.json.zip',
+                'library_activity_path': 'Apple_Media_Services/Apple Music Activity/Apple Music Library Activity.json.zip',
+                'likes_dislikes_path' : 'Apple_Media_Services/Apple Music Activity/Apple Music Likes and Dislikes.csv',
+                'play_activity_path': 'Apple_Media_Services/Apple Music Activity/Apple Music Play Activity.csv'
+            }
+        else:
+            target_files = target_files_dict
+
         if archive_path:
             archive_files = ZipFile(archive_path)
-            input_folder_name = archive_path.split('.')[0]
             
-            target_files = {
-                'identifier_infos_path' : '{0}/Apple Music Activity/Identifier Information.json.zip'.format(input_folder_name),
-                'library_tracks_path' : '{0}/Apple Music Activity/Apple Music Library Tracks.json.zip'.format(input_folder_name),
-                'library_activity_path': '{0}/Apple Music Activity/Apple Music Library Activity.json.zip'.format(input_folder_name),
-                'likes_dislikes_path' : '{0}/Apple Music Activity/Apple Music Likes and Dislikes.csv'.format(input_folder_name),
-                'play_activity_path': '{0}/Apple Music Activity/Apple Music Play Activity.csv'.format(input_folder_name)
-            }
-
             dataframes = {}
 
             if archive_files.testzip() == None:

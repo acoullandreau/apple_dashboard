@@ -8,14 +8,15 @@ import time
 start0 = time.time()
 
 # get the input files
-#input_df = Utility.get_df_from_archive('Apple_Media_Services_L.zip')
+input_df = Utility.get_df_from_archive('Apple_Media_Services_L.zip')
 
 # create an instance of the visualization dataframe class
-#df_viz = VisualizationDataframe(input_df)
-#Utility.save_to_pickle(df_viz, 'df_viz.pkl')
+df_viz = VisualizationDataframe(input_df)
+Utility.save_to_pickle(df_viz, 'df_viz.pkl')
 
-df_viz = Utility.load_from_pickle('df_viz.pkl')
-
+#df_viz = Utility.load_from_pickle('df_viz.pkl')
+df = df_viz.get_likes_dislikes_df()
+print(df)
 
 ###########################################################################################################################
 #extract a df using a query
