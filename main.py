@@ -8,15 +8,13 @@ import time
 start0 = time.time()
 
 # get the input files
-input_df = Utility.get_df_from_archive('Apple_Media_Services_L.zip')
+#input_df = Utility.get_df_from_archive('data/Apple_Media_Services_L.zip')
 
 # create an instance of the visualization dataframe class
-df_viz = VisualizationDataframe(input_df)
-Utility.save_to_pickle(df_viz, 'df_viz.pkl')
+#df_viz = VisualizationDataframe(input_df)
+#Utility.save_to_pickle(df_viz, 'df_viz.pkl')
 
-#df_viz = Utility.load_from_pickle('df_viz.pkl')
-df = df_viz.get_likes_dislikes_df()
-print(df)
+df_viz = Utility.load_from_pickle('df_viz.pkl')
 
 ###########################################################################################################################
 #extract a df using a query
@@ -117,7 +115,7 @@ print(df)
 # pie_chart.render_pie_chart()
 # pie_chart.figure.show()
 
-# plot a pie chart with another df
+# # plot a pie chart with another df
 # pie_chart = PieChartVisualization(df_viz.get_library_activity_df()['Transaction Agent Model'])
 # pie_chart.render_pie_chart()
 # pie_chart.figure.show()
@@ -171,17 +169,17 @@ print(df)
 
 
 # plot subplots of bar chart - HOD
-# df = df_viz.get_df_viz()
-# years_to_plot = sorted(df['Play_Year'].dropna().unique())
-# years_to_plot = [2015, 2016, 2017, 2018, 2019]
-# bar_chart = BarChartVisualization(df, with_subplots=len(years_to_plot))
+df = df_viz.get_df_viz()
+years_to_plot = sorted(df['Play_Year'].dropna().unique())
+years_to_plot = [2018, 2019]
+bar_chart = BarChartVisualization(df, with_subplots=len(years_to_plot))
 
-# for year in years_to_plot:
-#     x_serie = df[df['Play_Year']==year]['Play_HOD'].unique()
-#     y_serie = df[df['Play_Year']==year]['Play_HOD'].value_counts()
-#     bar_chart.render_bar_chart(x_serie, y_serie, str(year))
+for year in years_to_plot:
+    x_serie = df[df['Play_Year']==year]['Play_HOD'].unique()
+    y_serie = df[df['Play_Year']==year]['Play_HOD'].value_counts()
+    bar_chart.render_bar_chart(x_serie, y_serie, str(year))
 
-# bar_chart.figure.show()
+bar_chart.figure.show()
 
 
 # plot subplots of bar chart - HOD, single year
